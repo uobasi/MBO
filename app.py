@@ -88,7 +88,7 @@ def update_graph_live(n_intervals, data):
         symbolNum = FutureMBOSymbolNumList[FutureMBOSymbolList.index(stkName)]
         
     
-    if stkName in FutureMBOSymbolNumList:
+    if stkName in FutureMBOSymbolList:
         gclient = storage.Client(project="stockapp-401615")
         bucket = gclient.get_bucket("stockapp-storage")
         blob = Blob('levelTwoMBO', bucket) 
