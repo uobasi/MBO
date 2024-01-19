@@ -235,7 +235,7 @@ def update_graph_live(n_intervals, data):
     dBid = round(Bid / (Ask+Bid),2)
     
 
-    fig.update_layout(title='Aggressing order (Sell:'+str(dAsk)+')|(Buy'+str(dBid)+') '+ str(datetime.now().time()),height=800, xaxis_rangeslider_visible=False, showlegend=False)
+    fig.update_layout(title='Aggressing order (Sell:'+str(dAsk)+'('str(Ask)+')|(Buy'+str(dBid)+'('str(Bid)+') '+ str(datetime.now().time()),height=800, xaxis_rangeslider_visible=False, showlegend=False)
     #fig.show()
     #print("The time difference is :", timeit.default_timer() - starttime)
 
