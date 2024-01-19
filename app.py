@@ -160,7 +160,7 @@ def update_graph_live(n_intervals, data):
     
     minAgg2 = []
     for i in levelTwoMBO:
-        if i[4] == 'T':
+        if i[4] == 'T' or i[4] == 'F':
             if int(levelTwoMBO[0][0]) - (60000000000*15) <= int(i[0]):
                 minAgg2.append(i)
                 
