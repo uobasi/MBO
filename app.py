@@ -58,6 +58,10 @@ def update_output(n_clicks, value):
     if value in FutureMBOSymbolList:
         print('The input symbol was "{}" '.format(value))
         return str(value).upper(), str(value).upper()
+
+    elif value in currMBOSymbolList:
+        print('The input symbol was "{}" '.format(value))
+        return str(value).upper(), str(value).upper()
     
     
     else:
