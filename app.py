@@ -27,7 +27,7 @@ currMBOSymbolNumList =  ['156755', '156618', '1545', '156627', '156657', '156650
 #stkName = 'NQH4'  
 
 from dash import Dash, dcc, html, Input, Output, callback, State
-inter = 5000
+inter = 4000
 app = Dash()
 app.layout = html.Div([
     
