@@ -110,7 +110,7 @@ def update_graph_live(n_intervals, data):
     minAgg = []
     for i in levelTwoMBO:
         if i[4] == 'F':
-            if int(levelTwoMBO[0][0]) - (60000000000*5) <= int(i[0]):
+            if int(levelTwoMBO[0][0]) - (60000000000*10) <= int(i[0]):
                 minAgg.append(i)
                 
     dic = {}
