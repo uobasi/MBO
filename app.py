@@ -181,7 +181,7 @@ def update_graph_live(n_intervals, data):
     
     fig = make_subplots(rows=1, cols=2, shared_xaxes=True, shared_yaxes=True,
                         specs=[[{}, {}],], #[{}, {}, ]'+ '<br>' +' ( Put:'+str(putDecHalf)+'('+str(NumPutHalf)+') | '+'Call:'+str(CallDecHalf)+'('+str(NumCallHalf)+') '
-                        horizontal_spacing=0.02, vertical_spacing=0.03, subplot_titles=(stkName + 'MO (S:'+str(dAsk)+'('+str(Ask)+')|(B'+str(dBid)+'('+str(Bid)+')', 'LO (S:'+str(ldAsk)+'('+str(lAsk)+')|(B'+str(ldBid)+'('+str(lBid)+') ' + str(datetime.now().time()), ),
+                        horizontal_spacing=0.02, vertical_spacing=0.03, subplot_titles=('MO (S:'+str(dAsk)+'('+str(Ask)+')|(B'+str(dBid)+'('+str(Bid)+')', 'LO (S:'+str(ldAsk)+'('+str(lAsk)+')|(B'+str(ldBid)+'('+str(lBid)+')' ),
                          column_widths=[0.5,0.5], ) #row_width=[0.15, 0.85,],row_width=[0.30, 0.70,]
 
 
@@ -218,7 +218,8 @@ def update_graph_live(n_intervals, data):
         row=1, col=2
     )
     
-    fig.update_layout(height=800, xaxis_rangeslider_visible=False, showlegend=False)
+    fig.update_layout(title=stkName+' ' +str(datetime.now().time()),height=800, xaxis_rangeslider_visible=False, showlegend=False)
+
     
     fig.update_xaxes(autorange="reversed", row=1, col=2)
 
