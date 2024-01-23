@@ -190,7 +190,7 @@ def update_graph_live(n_intervals, data):
         go.Bar(
             x=pd.Series([i[1] for i in newDict2]),
             y=pd.Series([float(i[0][:len(i[0])-1]) for i in newDict2]),
-            text=pd.Series([i[0] for i in newDict2]),
+            text=pd.Series([i[0]  + '(' + str(i[1])+')' for i in newDict2]),
             textposition='auto',
             orientation='h',
             #width=0.2,
@@ -206,7 +206,7 @@ def update_graph_live(n_intervals, data):
         go.Bar(
             x=pd.Series([i[1] for i in newDict]),
             y=pd.Series([float(i[0][:len(i[0])-1]) for i in newDict]),
-            text=pd.Series([i[0] for i in newDict]),
+            text=pd.Series([i[0]  + '(' + str(i[1])+')' for i in newDict]),
             textposition='auto',
             orientation='h',
             #width=0.2,
