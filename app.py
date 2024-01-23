@@ -21,8 +21,8 @@ import timeit
 FutureMBOSymbolList = ['ESH4','NQH4','CLH4', 'GCG4', 'NGG4', 'HGH4', 'YMH4', 'BTCZ3', 'RTYH4']
 FutureMBOSymbolNumList = ['17077', '750', '463194', '41512', '56065', '31863', '204839', '75685', '7062', ]
 
-currMBOSymbolList = ['6AH4','6BH4','6CH4', '6EH4', '6JH4', '6SH4', '6NH4']
-currMBOSymbolNumList =  ['156755', '156618', '1545', '156627', '156657', '156650', '2259',]
+#currMBOSymbolList = ['6AH4','6BH4','6CH4', '6EH4', '6JH4', '6SH4', '6NH4']
+#currMBOSymbolNumList =  ['156755', '156618', '1545', '156627', '156657', '156650', '2259',]
 
 #stkName = 'NQH4'  
 
@@ -58,11 +58,6 @@ def update_output(n_clicks, value):
     if value in FutureMBOSymbolList:
         print('The input symbol was "{}" '.format(value))
         return str(value).upper(), str(value).upper()
-
-    elif value in currMBOSymbolList:
-        print('The input symbol was "{}" '.format(value))
-        return str(value).upper(), str(value).upper()
-    
     
     else:
         return 'The input symbol was '+str(value)+" is not accepted please try different symbol from  |'ESH4' 'NQH4' 'CLG4' 'GCG4' 'NGG4' 'HGH4' 'YMH4' 'BTCZ3' 'RTYH4'|  ", 'The input symbol was '+str(value)+" is not accepted please try different symbol  |'ESH4' 'NQH4' 'CLG4' 'GCG4' 'NGG4' 'HGH4' 'YMH4' 'BTCZ3' 'RTYH4'|  "
@@ -78,38 +73,24 @@ def update_graph_live(n_intervals, data):
     if data in FutureMBOSymbolList:
         stkName = data
         symbolNum = FutureMBOSymbolNumList[FutureMBOSymbolList.index(stkName)]
-        
-    elif data in currMBOSymbolList:
-        stkName = data
-        symbolNum = currMBOSymbolNumList[currMBOSymbolList.index(stkName)]
-        
+
     else:
         stkName = 'NQH4'  
         symbolNum = FutureMBOSymbolNumList[FutureMBOSymbolList.index(stkName)]
         
     
-    if stkName in FutureMBOSymbolList:
-        gclient = storage.Client(project="stockapp-401615")
-        bucket = gclient.get_bucket("stockapp-storage")
-        blob = Blob('levelTwoMBO', bucket) 
-        levelTwoMBO = blob.download_as_text()
-        
-        
-        csv_reader  = csv.reader(io.StringIO(levelTwoMBO))
-        
-    elif stkName in currMBOSymbolList:
-        gclient = storage.Client(project="stockapp-401615")
-        bucket = gclient.get_bucket("stockapp-storage")
-        blob = Blob('levelTwoMBOCurr', bucket) 
-        levelTwoMBO = blob.download_as_text()
-        
-        
-        csv_reader  = csv.reader(io.StringIO(levelTwoMBO))
-        
-        
+    gclient = storage.Client(project="stockapp-401615")
+    bucket = gclient.get_bucket("stockapp-storage")
+    blob = Blob('levelTwoMBO', bucket) 
+    levelTwoMBO = blob.download_as_text()
     
-        
     
+    csv_reader  = csv.reader(io.StringIO(levelTwoMBO))
+    
+    
+
+    
+
 
 
     csv_rows = []
@@ -125,11 +106,11 @@ def update_graph_live(n_intervals, data):
     Fill	F	A resting order was filled."""
 
 
-    '''
+    
     minAgg = []
     for i in levelTwoMBO:
         if i[4] == 'F':
-            if int(levelTwoMBO[0][0]) - (60000000000*15) <= int(i[0]):
+            if int(levelTwoMBO[0][0]) - (60000000000*10) <= int(i[0]):
                 minAgg.append(i)
                 
     dic = {}
@@ -148,7 +129,7 @@ def update_graph_live(n_intervals, data):
         newDict.append([str(i)+'B',dic[i][1]])
         
     newDict.sort(key=lambda x:float(x[0][:len(x[0])-1]), reverse=True)
-    
+    '''
     starttime = timeit.default_timer()
     print("The start time is :",starttime) 
     
@@ -184,33 +165,26 @@ def update_graph_live(n_intervals, data):
     newDict2.sort(key=lambda x:float(x[0][:len(x[0])-1]), reverse=True)
     
     
-
+    Ask = sum([i[1] for i in newDict2 if 'A' in i[0]])
+    Bid = sum([i[1] for i in newDict2 if 'B' in i[0]])
+    
+    dAsk = round(Ask / (Ask+Bid),2)
+    dBid = round(Bid / (Ask+Bid),2)
+    
+    lAsk = sum([i[1] for i in newDict if 'A' in i[0]])
+    lBid = sum([i[1] for i in newDict if 'B' in i[0]])
+    
+    ldAsk = round(lAsk / (lAsk+lBid),2)
+    ldBid = round(lBid / (lAsk+lBid),2)
     
     fig = go.Figure()
     
-    #fig = make_subplots(rows=1, cols=2, shared_xaxes=True, shared_yaxes=True,
-                        #specs=[[{}, {}],], #[{}, {}, ]'+ '<br>' +' ( Put:'+str(putDecHalf)+'('+str(NumPutHalf)+') | '+'Call:'+str(CallDecHalf)+'('+str(NumCallHalf)+') '
-                        #horizontal_spacing=0.02, vertical_spacing=0.03, subplot_titles=(stkName + 'Resting order', 'Aggressing order ' + str(datetime.now()), ),
-                         #column_widths=[0.5,0.5], ) #row_width=[0.15, 0.85,],row_width=[0.30, 0.70,]
+    fig = make_subplots(rows=1, cols=2, shared_xaxes=True, shared_yaxes=True,
+                        specs=[[{}, {}],], #[{}, {}, ]'+ '<br>' +' ( Put:'+str(putDecHalf)+'('+str(NumPutHalf)+') | '+'Call:'+str(CallDecHalf)+'('+str(NumCallHalf)+') '
+                        horizontal_spacing=0.02, vertical_spacing=0.03, subplot_titles=(stkName + 'MO (Sell:'+str(dAsk)+'('+str(Ask)+')|(Buy'+str(dBid)+'('+str(Bid)+')', 'LO (Sell:'+str(ldAsk)+'('+str(lAsk)+')|(Buy'+str(ldBid)+'('+str(lBid)+') ' + str(datetime.now().time()), ),
+                         column_widths=[0.5,0.5], ) #row_width=[0.15, 0.85,],row_width=[0.30, 0.70,]
 
-    
-    '''
-    fig.add_trace(
-        go.Bar(
-            x=pd.Series([i[1] for i in newDict]),
-            y=pd.Series([float(i[0][:len(i[0])-1]) for i in newDict]),
-            text=pd.Series([i[0] for i in newDict]),
-            textposition='auto',
-            orientation='h',
-            #width=0.2,
-            marker_color=[     'red' if 'A' in i[0] 
-                        else 'green' if 'B' in i[0]
-                        else i for i in newDict],
-            hovertext=pd.Series([i[0]  + ' ' + str(i[1]) for i in newDict]),
-        ),
-        row=1, col=1
-    )
-    '''
+
     
     fig.add_trace(
         go.Bar(
@@ -225,17 +199,30 @@ def update_graph_live(n_intervals, data):
                         else i for i in newDict2],
             hovertext=pd.Series([i[0]  + ' ' + str(i[1]) for i in newDict2]),
         ),
-        #row=1, col=2
+        row=1, col=1
     )
     
-    Ask = sum([i[1] for i in newDict2 if 'A' in i[0]])
-    Bid = sum([i[1] for i in newDict2 if 'B' in i[0]])
+    fig.add_trace(
+        go.Bar(
+            x=pd.Series([i[1] for i in newDict]),
+            y=pd.Series([float(i[0][:len(i[0])-1]) for i in newDict]),
+            text=pd.Series([i[0] for i in newDict]),
+            textposition='auto',
+            orientation='h',
+            #width=0.2,
+            marker_color=[     'red' if 'A' in i[0] 
+                        else 'green' if 'B' in i[0]
+                        else i for i in newDict],
+            hovertext=pd.Series([i[0]  + ' ' + str(i[1]) for i in newDict]),
+        ),
+        row=1, col=2
+    )
     
-    dAsk = round(Ask / (Ask+Bid),2)
-    dBid = round(Bid / (Ask+Bid),2)
+    fig.update_layout(height=800, xaxis_rangeslider_visible=False, showlegend=False)
     
+    fig.update_xaxes(autorange="reversed", row=1, col=2)
 
-    fig.update_layout(title='Aggressing order (Sell:'+str(dAsk)+'('+str(Ask)+')|(Buy'+str(dBid)+'('+str(Bid)+')'+ str(datetime.now().time()),height=800, xaxis_rangeslider_visible=False, showlegend=False)
+    #fig.update_layout(title=stkName+' Aggressive order (Sell:'+str(dAsk)+'('+str(Ask)+')|(Buy'+str(dBid)+'('+str(Bid)+')'+ str(datetime.now().time()),height=800, xaxis_rangeslider_visible=False, showlegend=False)
     #fig.show()
     #print("The time difference is :", timeit.default_timer() - starttime)
 
