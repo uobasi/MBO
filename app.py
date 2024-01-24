@@ -162,7 +162,7 @@ def update_graph_live(n_intervals, data):
                 
     newDict = []
     for i in dic:
-        if min([float(i) for i in dic2])-5 <= float(i) <= max([float(i) for i in dic2])+5:
+        if min([float(i) for i in dic2])-2 <= float(i) <= max([float(i) for i in dic2])+2:
             newDict.append([str(i)+'A',dic[i][0]])
             newDict.append([str(i)+'B',dic[i][1]])
         
