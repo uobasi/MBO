@@ -27,7 +27,7 @@ FutureMBOSymbolNumList = ['17077', '750', '463194', '41512', '56065', '31863', '
 #stkName = 'NQH4'  
 
 from dash import Dash, dcc, html, Input, Output, callback, State
-inter = 5000
+inter = 8000
 app = Dash()
 app.layout = html.Div([
     
