@@ -99,7 +99,7 @@ def update_graph_live(n_intervals, data):
         
         
     levelTwoMBO = csv_rows[::-1]
-    levelTwoMBO = [i for i in levelTwoMBO if i[6] == symbolNum and (i[4] == 'F' or i[4] == 'T')]
+    levelTwoMBO = [i for i in levelTwoMBO if i[6] == symbolNum and (i[4] == 'F' or i[4] == 'T' or i[4] == 'A')]
     
     """The event action. Can be [A]dd, [C]ancel, [M]odify, clea[R] book, [T]rade, or [F]ill.
     Trade	T	An aggressing order traded.
@@ -107,28 +107,7 @@ def update_graph_live(n_intervals, data):
 
 
     
-    minAgg = []
-    for i in levelTwoMBO:
-        if i[4] == 'F':
-            if int(levelTwoMBO[0][0]) - (60000000000*10) <= int(i[0]):
-                minAgg.append(i)
-                
-    dic = {}
-    for i in minAgg:
-        if i[2] not in dic:
-            dic[i[2]] = [0,0]
-        if i[2] in dic:
-            if i[5] == 'A':
-                dic[i[2]][0] += int(i[3])
-            elif i[5] == 'B':
-                dic[i[2]][1] += int(i[3])
-                
-    newDict = []
-    for i in dic:
-        newDict.append([str(i)+'A',dic[i][0]])
-        newDict.append([str(i)+'B',dic[i][1]])
-        
-    newDict.sort(key=lambda x:float(x[0][:len(x[0])-1]), reverse=True)
+    
     '''
     starttime = timeit.default_timer()
     print("The start time is :",starttime) 
@@ -163,6 +142,31 @@ def update_graph_live(n_intervals, data):
         newDict2.append([str(i)+'B',dic2[i][1]])
         
     newDict2.sort(key=lambda x:float(x[0][:len(x[0])-1]), reverse=True)
+    
+    
+    minAgg = []
+    for i in levelTwoMBO:
+        if i[4] == 'A':
+            if int(levelTwoMBO[0][0]) - (60000000000*10) <= int(i[0]):
+                minAgg.append(i)
+                
+    dic = {}
+    for i in minAgg:
+        if i[2] not in dic:
+            dic[i[2]] = [0,0]
+        if i[2] in dic:
+            if i[5] == 'A':
+                dic[i[2]][0] += int(i[3])
+            elif i[5] == 'B':
+                dic[i[2]][1] += int(i[3])
+                
+    newDict = []
+    for i in dic:
+        if min([float(i) for i in dic2])-5 <= float(i) <= max([float(i) for i in dic2])+5:
+            newDict.append([str(i)+'A',dic[i][0]])
+            newDict.append([str(i)+'B',dic[i][1]])
+        
+    newDict.sort(key=lambda x:float(x[0][:len(x[0])-1]), reverse=True)
     
     
     Ask = sum([i[1] for i in newDict2 if 'A' in i[0]])
