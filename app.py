@@ -24,7 +24,7 @@ FutureMBOSymbolNumList = ['17077', '750', '463194', '41512', '56065', '31863', '
 #stkName = 'NQH4'  
 
 from dash import Dash, dcc, html, Input, Output, callback, State
-inter = 6000
+inter = 5000
 app = Dash()
 app.layout = html.Div([
     
@@ -149,7 +149,7 @@ def update_graph_live(n_intervals, data):
     dBid = round(Bid / (Ask+Bid),2)
     
 
-    fig.update_layout(title=stkName + ' MO (Sell:'+str(dAsk)+')|(Buy'+str(dBid)+') '+ str(datetime.now().time()),height=800, xaxis_rangeslider_visible=False, showlegend=False)
+    fig.update_layout(title=stkName + ' MO '+str(Ask)+'(Sell:'+str(dAsk)+') | '+str(Bid)+ '(Buy'+str(dBid)+') '+ str(datetime.now().time()),height=800, xaxis_rangeslider_visible=False, showlegend=False)
     #fig.show()
     #print("The time difference is :", timeit.default_timer() - starttime)
 
