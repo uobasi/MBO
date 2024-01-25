@@ -221,8 +221,7 @@ def update_graph_live(n_intervals, data):
         ),
         row=1, col=2
     )
-    fig.add_hline(y=df['close'][len(df)-1], row=1, col=1)
-    fig.add_hline(y=df['close'][len(df)-1], row=1, col=2)
+
     
     fig.update_layout(title=stkName+' ' +str(datetime.now().time()),height=800, xaxis_rangeslider_visible=False, showlegend=False)
 
