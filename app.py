@@ -147,6 +147,8 @@ def update_graph_live(n_intervals, data):
     
     dAsk = round(Ask / (Ask+Bid),2)
     dBid = round(Bid / (Ask+Bid),2)
+
+    fig.add_hline(y=float(levelTwoMBO[len(levelTwoMBO)-1][2]))
     
 
     fig.update_layout(title=stkName + ' MO '+str(Ask)+'(Sell:'+str(dAsk)+') | '+str(Bid)+ '(Buy'+str(dBid)+') '+ str(datetime.now().time()),height=800, xaxis_rangeslider_visible=False, showlegend=False)
