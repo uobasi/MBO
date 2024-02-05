@@ -18,8 +18,8 @@ pio.renderers.default='browser'
 import timeit
 
     
-FutureMBOSymbolList = ['ESH4','NQH4','CLH4', 'GCG4', 'NGG4', 'HGH4', 'YMH4', 'BTCZ3', 'RTYH4']
-FutureMBOSymbolNumList = ['17077', '750', '463194', '41512', '56065', '31863', '204839', '75685', '7062', ]
+FutureMBOSymbolList = ['ESH4','NQH4','CLH4', 'GCJ4', 'HGH4', 'YMH4', 'BTCG4', 'RTYH4']
+FutureMBOSymbolNumList = ['17077', '750', '463194', '44740', '31863', '204839', '42007360', '7062', ]
 
 #stkName = 'NQH4'  
 
@@ -98,7 +98,7 @@ def update_graph_live(n_intervals, data):
     minAgg2 = []
     for i in levelTwoMBO:
         if i[4] == 'T':
-            if int(levelTwoMBO[0][0]) - (60000000000*20) <= int(i[0]):
+            if int(levelTwoMBO[0][0]) - (60000000000*15) <= int(i[0]):
                 minAgg2.append(i)
                 
     dic2 = {}
