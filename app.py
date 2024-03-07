@@ -78,7 +78,7 @@ def update_graph_live(n_intervals, data):
        
     gclient = storage.Client(project="stockapp-401615")
     bucket = gclient.get_bucket("stockapp-storage")
-    blob = Blob('levelTwoMBO', bucket) 
+    blob = Blob('levelTwoMBO'+str(symbolNum), bucket) 
     levelTwoMBO = blob.download_as_text()
     
     
