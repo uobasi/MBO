@@ -18,8 +18,8 @@ pio.renderers.default='browser'
 import timeit
 
     
-FutureMBOSymbolList = ['ESH4','NQH4','CLH4', 'GCJ4', 'HGH4', 'YMH4', 'BTCG4', 'RTYH4']
-FutureMBOSymbolNumList = ['17077', '750', '463194', '44740', '31863', '204839', '42007360', '7062', ]
+FutureMBOSymbolNumList = ['17077', '750', '44740', '1101', '204839',  '7062', '2259', '156627', '156755', '1545', '4122', '270851', '948' ]
+FutureMBOSymbolList = ['ESH4','NQH4', 'GCJ4', 'HGK4', 'YMH4', 'RTYH4', '6NH4', '6EH4', '6AH4', '6CH4', 'SIK4', 'CLJ4', 'NGJ4'  ]
 
 #stkName = 'NQH4'  
 
@@ -37,7 +37,7 @@ app.layout = html.Div([
 
     html.Div(dcc.Input(id='input-on-submit', type='text')),
     html.Button('Submit', id='submit-val', n_clicks=0),
-    html.Div(id='container-button-basic',children="Enter a symbol from |'ESH4' 'NQH4' 'CLG4' 'GCG4' 'NGG4' 'HGH4' 'YMH4' 'BTCZ3' 'RTYH4'| and submit"),
+    html.Div(id='container-button-basic',children="Enter a symbol from |'ESH4' 'NQH4' 'GCJ4' 'HGK4' 'YMH4' 'RTYH4' 'SIK4' 'CLJ4' 'NGJ4' | and submit"),
     dcc.Store(id='stkName-value')
 ])
 
