@@ -91,13 +91,13 @@ def update_graph_live(n_intervals, data):
         
         
     levelTwoMBO = csv_rows[::-1]
-    levelTwoMBO = [i for i in levelTwoMBO if i[6] == symbolNum and (i[4] == 'T' or i[4] == 'F')]
+    levelTwoMBO = [i for i in levelTwoMBO if i[6] == symbolNum and (i[4] == 'T')]
     
 
     
     minAgg2 = []
     for i in levelTwoMBO:
-        if i[4] == 'T' or i[4] == 'F':
+        if i[4] == 'T':
             if int(levelTwoMBO[0][0]) - (60000000000*15) <= int(i[0]):
                 minAgg2.append(i)
                 
