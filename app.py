@@ -36,8 +36,8 @@ def find_clusters(numbers, threshold):
     
     return clusters
     
-FutureMBOSymbolNumList = ['17077', '750', '44740', '1101', '204839',  '7062', '2259', '156627', '156755', '1545', '4122', '270851', '948' ]
-FutureMBOSymbolList = ['ESH4','NQH4', 'GCJ4', 'HGK4', 'YMH4', 'RTYH4', '6NH4', '6EH4', '6AH4', '6CH4', 'SIK4', 'CLJ4', 'NGJ4'  ]
+FutureMBOSymbolNumList = ['5602', '13743', '44740', '1101', '80420', '2552', '2259', '156627', '156755', '1545', '4122', '270851', '948' ]
+FutureMBOSymbolList = ['ES','NQ', 'GC', 'HG', 'YM', 'RTY', '6N', '6E', '6A', '6C', 'SI', 'CL', 'NG'  ]
 
 #stkName = 'NQH4' 
 gclient = storage.Client(project="stockapp-401615")
@@ -57,7 +57,7 @@ app.layout = html.Div([
 
     html.Div(dcc.Input(id='input-on-submit', type='text')),
     html.Button('Submit', id='submit-val', n_clicks=0),
-    html.Div(id='container-button-basic',children="Enter a symbol from |'ESH4' 'NQH4' 'GCJ4' 'HGK4' 'YMH4' 'RTYH4' 'SIK4' 'CLJ4' 'NGJ4' | and submit"),
+    html.Div(id='container-button-basic',children="Enter a symbol from |'ES' 'NQ' 'GC' 'HG' 'YM' 'RTY' 'SI' 'CL' 'NG'| and submit"),
     dcc.Store(id='stkName-value')
 ])
 
@@ -78,7 +78,7 @@ def update_output(n_clicks, value):
     
     
     else:
-        return 'The input symbol was '+str(value)+" is not accepted please try different symbol from  |'ESH4' 'NQH4' 'CLG4' 'GCG4' 'NGG4' 'HGH4' 'YMH4' 'BTCZ3' 'RTYH4'|  ", 'The input symbol was '+str(value)+" is not accepted please try different symbol  |'ESH4' 'NQH4' 'CLG4' 'GCG4' 'NGG4' 'HGH4' 'YMH4' 'BTCZ3' 'RTYH4'|  "
+        return 'The input symbol was '+str(value)+" is not accepted please try different symbol from  |'ES' 'NQ' 'GC' 'HG' 'YM' 'RTY' 'SI' 'CL' 'NG'|  ", 'The input symbol was '+str(value)+" is not accepted please try different symbol  |'ESH4' 'NQH4' 'CLG4' 'GCG4' 'NGG4' 'HGH4' 'YMH4' 'BTCZ3' 'RTYH4'|  "
 
 @callback(Output('graph', 'figure'),
           Input('interval', 'n_intervals'),
