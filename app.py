@@ -216,7 +216,10 @@ def update_graph_live(n_intervals, data):
     for i in cdata:
         if len(i) >= 3:
             opac = round((len(i)/mazz)/1.2,2)
-            if (abs(float(i[0]) - float(levelTwoMBO[0][2])) / ((float(i[0]) + float(levelTwoMBO[0][2])) / 2)) * 100 <= 0.02 or (abs(float(i[len(i)-1]) - float(levelTwoMBO[0][2])) / ((float(i[len(i)-1]) + float(levelTwoMBO[0][2])) / 2)) * 100 <= 0.02:
+            tmt = list(set([float(i[0][:len(i[0])-1]) for i in newDict2]))   
+            tmt.sort(reverse=False)     
+            #if (float(i[0]) >= tmt[0] and float(i[0]) <= tmt[len(tmt)-1]) or (float(i[len(i)-1]) >= tmt[0] and float(i[len(i)-1]) <= tmt[len(tmt)-1]):
+            if (abs(float(i[0]) - float(levelTwoMBO[0][2])) / ((float(i[0]) + float(levelTwoMBO[0][2])) / 2)) * 100 <= 0.05 or (abs(float(i[len(i)-1]) - float(levelTwoMBO[0][2])) / ((float(i[len(i)-1]) + float(levelTwoMBO[0][2])) / 2)) * 100 <= 0.05:
                 fig.add_shape(type="rect",
                           y0=i[0], y1=i[len(i)-1], x0=0, x1=max([i[1] for i in newDict2]),
                           fillcolor="darkcyan",
