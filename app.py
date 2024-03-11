@@ -92,7 +92,7 @@ def update_graph_live(n_intervals, data):
         stkName = data
         symbolNum = FutureMBOSymbolNumList[FutureMBOSymbolList.index(stkName)] 
     else:
-        stkName = 'NQH4'  
+        stkName = 'NQ'  
         symbolNum = FutureMBOSymbolNumList[FutureMBOSymbolList.index(stkName)]
         
        
