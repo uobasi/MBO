@@ -286,7 +286,7 @@ def update_graph_live(n_intervals, data):
 
     # Add the second line
     fig.add_trace(go.Scatter(x=timeTracker, y=bidTracker, mode='lines+markers', name='Bid'),row=2, col=1)
-    
+    fig.update_xaxes(showticklabels=False, row=2, col=1)
             
     
     fig.update_layout(title=stkName + ' MO '+str(Ask)+'(Sell:'+str(dAsk)+') | '+str(Bid)+ '(Buy'+str(dBid)+') '+ str(datetime.now().time()),height=800, xaxis_rangeslider_visible=False, showlegend=False)
