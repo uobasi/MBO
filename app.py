@@ -270,7 +270,7 @@ def update_graph_live(n_intervals, data):
     
     timestamp = int(minAgg2[len(minAgg2)-1][0]) / 1e9
     formatted_time = datetime.fromtimestamp(timestamp).strftime("%H:%M:%S")
-    fig.update_layout(title=stkName + ' MO '+str(Ask)+'(Sell:'+str(dAsk)+') | '+str(Bid)+ '(Buy'+str(dBid)+') '+ str(datetime.now().time()) + ' S: '+formatted_time,height=800, xaxis_rangeslider_visible=False, showlegend=False)
+    fig.update_layout(title=stkName + ' MO '+str(Ask)+'(Sell:'+str(dAsk)+') | '+str(Bid)+ '(Buy'+str(dBid)+') '+ str(datetime.now().time()),height=800, xaxis_rangeslider_visible=False, showlegend=False)
 
     return fig
 
