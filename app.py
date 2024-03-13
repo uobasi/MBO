@@ -44,7 +44,7 @@ gclient = storage.Client(project="stockapp-401615")
 bucket = gclient.get_bucket("stockapp-storage") 
 
 from dash import Dash, dcc, html, Input, Output, callback, State
-inter = 8000
+inter = 6000
 askTracker = []
 bidTracker = []
 timeTracker = []
