@@ -44,7 +44,10 @@ gclient = storage.Client(project="stockapp-401615")
 bucket = gclient.get_bucket("stockapp-storage") 
 
 from dash import Dash, dcc, html, Input, Output, callback, State
-inter = 5000
+inter = 8000
+askTracker = []
+bidTracker = []
+timeTracker = []
 app = Dash()
 app.layout = html.Div([
     
@@ -116,8 +119,8 @@ def update_graph_live(n_intervals, data):
     
     minAgg2 = []
     for i in levelTwoMBO:
-        if i[4] == 'T': # and int(i[3]) >= 2
-            if int(levelTwoMBO[0][0]) - (60000000000*10) <= int(i[0]):
+        if i[4] == 'T' and int(i[3]) >= 2: # 
+            if int(levelTwoMBO[0][0]) - (60000000000*7) <= int(i[0]):
                 minAgg2.append(i)
                 
     dic2 = {}
@@ -181,6 +184,12 @@ def update_graph_live(n_intervals, data):
 
     
     fig = go.Figure()
+    fig = make_subplots(rows=2, cols=1, shared_xaxes=False, shared_yaxes=False,
+                        specs=[[{}],
+                               [{}]], #[{}, {}, ]'+ '<br>' +' ( Put:'+str(putDecHalf)+'('+str(NumPutHalf)+') | '+'Call:'+str(CallDecHalf)+'('+str(NumCallHalf)+') '
+                        horizontal_spacing=0.02, vertical_spacing=0.03,
+                         row_width=[0.30, 0.70,] ) #,row_width=[0.30, 0.70,] column_widths=[0.80,0.20],
+
 
     
     fig.add_trace(
@@ -195,10 +204,14 @@ def update_graph_live(n_intervals, data):
                         else i for i in newDict2],
             hovertext=pd.Series([i[0]  + ' ' + str(i[1]) for i in newDict2]),
         ),
+        row=1, col=1
     )
     
     Ask = sum([i[1] for i in newDict2 if 'A' in i[0]])
     Bid = sum([i[1] for i in newDict2 if 'B' in i[0]])
+    askTracker.append(Ask)
+    bidTracker.append(Bid)
+    timeTracker.append(datetime.now().time().strftime('%H:%M:%S'))
     
     dAsk = round(Ask / (Ask+Bid),2)
     dBid = round(Bid / (Ask+Bid),2)
@@ -253,6 +266,7 @@ def update_graph_live(n_intervals, data):
                                      mode= 'lines',
                                     
                                     ),
+                                     row=1, col=1
                         )
     
                 fig.add_trace(go.Scatter(x=pd.Series(max([i[1] for i in newDict2])) ,
@@ -265,8 +279,15 @@ def update_graph_live(n_intervals, data):
                                      mode= 'lines',
                                     
                                     ),
+                                     row=1, col=1
                         )
-        
+                
+    fig.add_trace(go.Scatter(x=timeTracker, y=askTracker, mode='lines+markers', name='Ask'),row=2, col=1)
+
+    # Add the second line
+    fig.add_trace(go.Scatter(x=timeTracker, y=bidTracker, mode='lines+markers', name='Bid'),row=2, col=1)
+    
+            
     
     fig.update_layout(title=stkName + ' MO '+str(Ask)+'(Sell:'+str(dAsk)+') | '+str(Bid)+ '(Buy'+str(dBid)+') '+ str(datetime.now().time()),height=800, xaxis_rangeslider_visible=False, showlegend=False)
 
