@@ -184,11 +184,6 @@ def update_graph_live(n_intervals, data):
 
     
     fig = go.Figure()
-    fig = make_subplots(rows=2, cols=1, shared_xaxes=False, shared_yaxes=False,
-                        specs=[[{}],
-                               [{}]], #[{}, {}, ]'+ '<br>' +' ( Put:'+str(putDecHalf)+'('+str(NumPutHalf)+') | '+'Call:'+str(CallDecHalf)+'('+str(NumCallHalf)+') '
-                        horizontal_spacing=0.02, vertical_spacing=0.03,
-                         row_width=[0.30, 0.70,] ) #,row_width=[0.30, 0.70,] column_widths=[0.80,0.20],
 
 
     
@@ -204,7 +199,6 @@ def update_graph_live(n_intervals, data):
                         else i for i in newDict2],
             hovertext=pd.Series([i[0]  + ' ' + str(i[1]) for i in newDict2]),
         ),
-        row=1, col=1
     )
     
     Ask = sum([i[1] for i in newDict2 if 'A' in i[0]])
@@ -266,7 +260,6 @@ def update_graph_live(n_intervals, data):
                                      mode= 'lines',
                                     
                                     ),
-                                     row=1, col=1
                         )
     
                 fig.add_trace(go.Scatter(x=pd.Series(max([i[1] for i in newDict2])) ,
@@ -279,14 +272,8 @@ def update_graph_live(n_intervals, data):
                                      mode= 'lines',
                                     
                                     ),
-                                     row=1, col=1
                         )
                 
-    fig.add_trace(go.Scatter(x=timeTracker, y=askTracker, mode='lines+markers', name='Ask', marker=dict(color='red')),row=2, col=1)
-
-    # Add the second line
-    fig.add_trace(go.Scatter(x=timeTracker, y=bidTracker, mode='lines+markers', name='Bid', marker=dict(color='green')),row=2, col=1)
-    fig.update_xaxes(showticklabels=False, row=2, col=1)
             
     
     fig.update_layout(title=stkName + ' MO '+str(Ask)+'(Sell:'+str(dAsk)+') | '+str(Bid)+ '(Buy'+str(dBid)+') '+ str(datetime.now().time()),height=800, xaxis_rangeslider_visible=False, showlegend=False)
