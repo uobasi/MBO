@@ -212,6 +212,9 @@ def update_graph_live(n_intervals, data):
     askTracker.append(Ask)
     bidTracker.append(Bid)
     timeTracker.append(datetime.now().time().strftime('%H:%M:%S'))
+
+    askDifferences = [askTracker[i + 1] - askTracker[i] for i in range(len(askTracker) - 1)]
+    bidDifferences = [bidTracker[i + 1] - bidTracker[i] for i in range(len(bidTracker) - 1)]
     
     dAsk = round(Ask / (Ask+Bid),2)
     dBid = round(Bid / (Ask+Bid),2)
@@ -282,10 +285,10 @@ def update_graph_live(n_intervals, data):
                                      row=1, col=1
                         )
                 
-    fig.add_trace(go.Scatter(x=timeTracker, y=askTracker, mode='lines+markers', name='Ask', marker=dict(color='red')),row=2, col=1)
+    fig.add_trace(go.Scatter(x=timeTracker, y=askDifferences, mode='lines+markers', name='Ask', marker=dict(color='red')),row=2, col=1)
 
     # Add the second line
-    fig.add_trace(go.Scatter(x=timeTracker, y=bidTracker, mode='lines+markers', name='Bid', marker=dict(color='green')),row=2, col=1)
+    fig.add_trace(go.Scatter(x=timeTracker, y=bidDifferences, mode='lines+markers', name='Bid', marker=dict(color='green')),row=2, col=1)
     fig.update_xaxes(showticklabels=False, row=2, col=1)
             
     
