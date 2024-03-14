@@ -282,10 +282,10 @@ def update_graph_live(n_intervals, data):
                                      row=1, col=1
                         )
                 
-    fig.add_trace(go.Scatter(x=timeTracker, y=askTracker, mode='lines+markers', name='Ask'),row=2, col=1)
+    fig.add_trace(go.Scatter(x=timeTracker, y=askTracker, mode='lines+markers', name='Ask', marker=dict(color='red')),row=2, col=1)
 
     # Add the second line
-    fig.add_trace(go.Scatter(x=timeTracker, y=bidTracker, mode='lines+markers', name='Bid'),row=2, col=1)
+    fig.add_trace(go.Scatter(x=timeTracker, y=bidTracker, mode='lines+markers', name='Bid', marker=dict(color='green')),row=2, col=1)
     fig.update_xaxes(showticklabels=False, row=2, col=1)
             
     
