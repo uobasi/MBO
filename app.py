@@ -212,7 +212,7 @@ def update_graph_live(n_intervals, data):
 
     fig.add_hline(y=float(levelTwoMBO[0][2]))
 
-    sortadlist = ntList[:40]
+    sortadlist = ntList[:100]
     data = [i[0] for i in sortadlist]
     data.sort(reverse=True)
     differences = [abs(data[i + 1] - data[i]) for i in range(len(data) - 1)]
