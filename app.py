@@ -113,14 +113,14 @@ def update_graph_live(n_intervals, data):
         
         
     levelTwoMBO = csv_rows[::-1]
-    levelTwoMBO = [i for i in levelTwoMBO if i[6] == symbolNum and (i[4] == 'T')]
+    levelTwoMBO = [i for i in levelTwoMBO ] #if i[6] == symbolNum and (i[4] == 'T')
     
 
     
     minAgg2 = []
     for i in levelTwoMBO:
-        if i[4] == 'T': #  and int(i[3]) >= 2 
-            if int(levelTwoMBO[0][0]) - (60000000000*10) <= int(i[0]):
+        #if i[4] == 'T': #  and int(i[3]) >= 2 
+            #if int(levelTwoMBO[0][0]) - (60000000000*10) <= int(i[0]):
                 minAgg2.append(i)
                 
     dic2 = {}
@@ -153,7 +153,7 @@ def update_graph_live(n_intervals, data):
         csv_rows.append(row)
         
     
-    STrades = [i for i in csv_rows if i[4] == symbolNum]
+    STrades = [i for i in csv_rows]  #if i[4] == symbolNum
     AllTrades = []
     for i in STrades:
         hourss = datetime.fromtimestamp(int(int(i[0])// 1000000000)).hour
