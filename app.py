@@ -36,20 +36,18 @@ def find_clusters(numbers, threshold):
     
     return clusters
     
-FutureMBOSymbolNumList = ['5602', '13743', '44740', '1101', '80420', '2552', '2259', '156627', '156755', '1545', '4122', '270851', '948' ]
-FutureMBOSymbolList = ['ES','NQ', 'GC', 'HG', 'YM', 'RTY', '6N', '6E', '6A', '6C', 'SI', 'CL', 'NG'  ]
+FutureMBOSymbolNumList = ['5602', '13743', '669', '1101', '80420', '2552',  '4122', '109044', '946']
+FutureMBOSymbolList = ['ES','NQ', 'GC', 'HG', 'YM', 'RTY',  'SI', 'CL', 'NG']
 
 #stkName = 'NQH4' 
 gclient = storage.Client(project="stockapp-401615")
 bucket = gclient.get_bucket("stockapp-storage") 
 
 from dash import Dash, dcc, html, Input, Output, callback, State
-inter = 6000
+inter = 5000
 askTracker = []
 bidTracker = []
 timeTracker = []
-start_time = datetime.now()
-ten_minutes = timedelta(minutes=10)
 app = Dash()
 app.layout = html.Div([
     
@@ -121,8 +119,8 @@ def update_graph_live(n_intervals, data):
     
     minAgg2 = []
     for i in levelTwoMBO:
-        #if i[4] == 'T' : # and int(i[3]) >= 2
-            if int(levelTwoMBO[0][0]) - (60000000000*10) <= int(i[0]):
+        #if i[4] == 'T': #  and int(i[3]) >= 2 
+            if int(levelTwoMBO[0][0]) - (60000000000*16) <= int(i[0]):
                 minAgg2.append(i)
                 
     dic2 = {}
@@ -155,7 +153,7 @@ def update_graph_live(n_intervals, data):
         csv_rows.append(row)
         
     
-    STrades = [i for i in csv_rows]
+    STrades = [i for i in csv_rows]  #if i[4] == symbolNum
     AllTrades = []
     for i in STrades:
         hourss = datetime.fromtimestamp(int(int(i[0])// 1000000000)).hour
@@ -186,11 +184,6 @@ def update_graph_live(n_intervals, data):
 
     
     fig = go.Figure()
-    fig = make_subplots(rows=2, cols=1, shared_xaxes=False, shared_yaxes=False,
-                        specs=[[{}],
-                               [{}]], #[{}, {}, ]'+ '<br>' +' ( Put:'+str(putDecHalf)+'('+str(NumPutHalf)+') | '+'Call:'+str(CallDecHalf)+'('+str(NumCallHalf)+') '
-                        horizontal_spacing=0.02, vertical_spacing=0.03,
-                         row_width=[0.30, 0.70,] ) #,row_width=[0.30, 0.70,] column_widths=[0.80,0.20],
 
 
     
@@ -206,7 +199,6 @@ def update_graph_live(n_intervals, data):
                         else i for i in newDict2],
             hovertext=pd.Series([i[0]  + ' ' + str(i[1]) for i in newDict2]),
         ),
-        row=1, col=1
     )
     
     Ask = sum([i[1] for i in newDict2 if 'A' in i[0]])
@@ -268,7 +260,6 @@ def update_graph_live(n_intervals, data):
                                      mode= 'lines',
                                     
                                     ),
-                                     row=1, col=1
                         )
     
                 fig.add_trace(go.Scatter(x=pd.Series(max([i[1] for i in newDict2])) ,
@@ -281,22 +272,8 @@ def update_graph_live(n_intervals, data):
                                      mode= 'lines',
                                     
                                     ),
-                                     row=1, col=1
                         )
-    
-    
-    #if datetime.now() >= start_time + ten_minutes:
-        #print('10 mins passsed')
-        #start_time += ten_minutes
-      #timeTracker = timeTracker[50:]
-        #askTracker = askTracker[50:]
-        #bidTracker = bidTracker[50:]'''
-        
-    fig.add_trace(go.Scatter(x=timeTracker, y=askTracker, mode='lines', name='Ask', marker=dict(color='red')),row=2, col=1)
-
-    # Add the second line
-    fig.add_trace(go.Scatter(x=timeTracker, y=bidTracker, mode='lines', name='Bid', marker=dict(color='green')),row=2, col=1)
-    fig.update_xaxes(showticklabels=False, row=2, col=1)
+                
             
     
     fig.update_layout(title=stkName + ' MO '+str(Ask)+'(Sell:'+str(dAsk)+') | '+str(Bid)+ '(Buy'+str(dBid)+') '+ str(datetime.now().time()),height=800, xaxis_rangeslider_visible=False, showlegend=False)
@@ -307,4 +284,12 @@ def update_graph_live(n_intervals, data):
 if __name__ == '__main__': 
     app.run_server(debug=False, host='0.0.0.0', port=8080)
     #app.run_server(debug=False, use_reloader=False)
+    
+
+
+
+                
+                
+        
+        
     
