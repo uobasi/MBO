@@ -45,9 +45,9 @@ bucket = gclient.get_bucket("stockapp-storage")
 
 from dash import Dash, dcc, html, Input, Output, callback, State
 inter = 5000
-askTracker = []
-bidTracker = []
-timeTracker = []
+#askTracker = []
+#bidTracker = []
+#timeTracker = []
 app = Dash()
 app.layout = html.Div([
     
@@ -203,9 +203,9 @@ def update_graph_live(n_intervals, data):
     
     Ask = sum([i[1] for i in newDict2 if 'A' in i[0]])
     Bid = sum([i[1] for i in newDict2 if 'B' in i[0]])
-    askTracker.append(Ask)
-    bidTracker.append(Bid)
-    timeTracker.append(datetime.now().time().strftime('%H:%M:%S'))
+    #askTracker.append(Ask)
+    #bidTracker.append(Bid)
+    #timeTracker.append(datetime.now().time().strftime('%H:%M:%S'))
     
     dAsk = round(Ask / (Ask+Bid),2)
     dBid = round(Bid / (Ask+Bid),2)
