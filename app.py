@@ -293,7 +293,7 @@ def update_graph_live(n_intervals, data, interv): #interv
             
     
     fig = go.Figure()
-    fig = make_subplots(rows=2, cols=1, shared_xaxes=False, shared_yaxes=False,
+    fig = make_subplots(rows=2, cols=1, shared_xaxes=True, shared_yaxes=False,
                         specs=[[{}],
                                [{}]],
                         horizontal_spacing=0.02, vertical_spacing=0.03,
