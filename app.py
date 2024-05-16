@@ -354,7 +354,7 @@ def update_graph_live(n_intervals, data, interv): #interv
     end_time = time.time()
     # Calculate the elapsed time
     elapsed_time = end_time - start_time
-    print(f"Elapsed time: {elapsed_time} seconds")
+    print(f"Elapsed time: {elapsed_time} seconds {stkName}")
     #fig.show()
     #print("The time difference is :", timeit.default_timer() - starttime)
 
