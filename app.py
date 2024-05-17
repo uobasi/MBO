@@ -355,8 +355,32 @@ def update_graph_live(n_intervals, data, interv): #interv
     
     posti = sum([i[0] for i in difList if i[0] > 0])/len([i[0] for i in difList if i[0] > 0])
     negati = sum([i[0] for i in difList if i[0] < 0])/len([i[0] for i in difList if i[0] < 0])
-    fig.add_hline(y=posti, row=1, col=1)
-    fig.add_hline(y=negati, row=1, col=1)
+
+    fig.add_trace(go.Scatter(x=df['time'],
+                             y= [posti]*len(df['time']) ,
+                             line_color='teal',
+                             text = str(posti),
+                             textposition="bottom left",
+                             name=str(posti),
+                             showlegend=False,
+                             mode= 'lines',
+                            ),
+                    row=1, col=1
+                 )
+
+    fig.add_trace(go.Scatter(x=df['time'],
+                             y= [negati]*len(df['time']) ,
+                             line_color='teal',
+                             text = str(negati),
+                             textposition="bottom left",
+                             name=str(negati),
+                             showlegend=False,
+                             mode= 'lines',
+                            ),
+                    row=1, col=1
+                 )
+    #fig.add_hline(y=posti, row=1, col=1)
+    #fig.add_hline(y=negati, row=1, col=1)
 
     fig.update_layout(title=stkName + str(datetime.now().time()),height=800, xaxis_rangeslider_visible=False, showlegend=False)
     fig.update_xaxes(showticklabels=False, row=1, col=1)
