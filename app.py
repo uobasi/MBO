@@ -370,7 +370,7 @@ def update_graph_live(n_intervals, data, interv): #interv
 
     fig.add_trace(go.Scatter(x=df['time'],
                              y= [negati]*len(df['time']) ,
-                             line_color='teal',
+                             line_color='crimson',
                              text = str(negati),
                              textposition="bottom left",
                              name=str(negati),
