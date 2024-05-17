@@ -250,46 +250,15 @@ def update_graph_live(n_intervals, data, interv): #interv
                 timeDict[i] += [0, 0,0]
                 
     
-    
-    dcount = {}
-    for cd in cdDict:
-        count_dict = Counter([i[0] for i in cdDict[cd]])
-        sorted_data = sorted(cdDict[cd], key=lambda x: x[0])
-        for i in count_dict:
-            for x in sorted_data:
-                if i == x[0]:
-                    if cd not in dcount:
-                        dcount[cd] = {}
-                    if cd in dcount:
-                        if i not in dcount[cd]:
-                            dcount[cd][i] = [0,0,0,0]
-                        if i in dcount[cd]:
-                            if x[2] == 'B':
-                                dcount[cd][i][0] += x[1]
-                                #dcount[cd][i][2] = round(dcount[cd][i][0]/(dcount[cd][i][0]+dcount[cd][i][1]),2)
-                                dcount[cd][i][2] = dcount[cd][i][0] - dcount[cd][i][1]
-                                dcount[cd][i][3] = dcount[cd][i][0] + dcount[cd][i][1]
-                            if x[2] == 'A':
-                                dcount[cd][i][1] += x[1]
-                                #dcount[cd][i][3] = round(dcount[cd][i][1]/(dcount[cd][i][0]+dcount[cd][i][1]),2)
-                                dcount[cd][i][2] = dcount[cd][i][0] - dcount[cd][i][1]
-                                dcount[cd][i][3] = dcount[cd][i][0] + dcount[cd][i][1]
-                if x[0] > i:
-                    break
                                 
     timeFrame = [[i,'']+timeDict[i] for i in timeDict]
 
     for i in range(len(timeFrame)):
         timeFrame[i].append(dtimeEpoch[i])
         
-    
-    for i in timeFrame:
-        try:
-            i.append(dict(sorted(dcount[i[0]].items(), reverse=True)))
-        except(KeyError):
-            dcount[i[0]] = {}
-            i.append(dcount[i[0]])
-            
+    for pott in timeFrame:
+        pott.insert(4,df['timestamp'].searchsorted(pott[8]))
+        
     
     fig = go.Figure()
     fig = make_subplots(rows=2, cols=1, shared_xaxes=True, shared_yaxes=False,
@@ -301,8 +270,7 @@ def update_graph_live(n_intervals, data, interv): #interv
         
     
     OptionTimeFrame = timeFrame        
-    for pott in OptionTimeFrame:
-        pott.insert(4,df['timestamp'].searchsorted(pott[8]))
+    
         
     optColor = [     'teal' if float(i[2]) > float(i[3]) #rgba(0,128,0,1.0)
                 else 'crimson' if float(i[3]) > float(i[2])#rgba(255,0,0,1.0)
