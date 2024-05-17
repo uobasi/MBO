@@ -340,6 +340,12 @@ def update_graph_live(n_intervals, data, interv): #interv
         ),
         row=2, col=1
     )
+
+    bms = pd.Series([i[2] for i in OptionTimeFrame]).rolling(3).mean()
+    sms = pd.Series([i[3] for i in OptionTimeFrame]).rolling(3).mean()
+    #xms = pd.Series([i[3]+i[2] for i in OptionTimeFrame]).rolling(4).mean()
+    fig.add_trace(go.Scatter(x=pd.Series([i[0] for i in OptionTimeFrame]), y=bms, line=dict(color='teal'), mode='lines', name='Buy VMA'), row=2, col=1)
+    fig.add_trace(go.Scatter(x=pd.Series([i[0] for i in OptionTimeFrame]), y=sms, line=dict(color='crimson'), mode='lines', name='Sell VMA'), row=2, col=1)
     
     
     difList = [(i[2]-i[3],i[0]) for i in OptionTimeFrame]
