@@ -107,8 +107,7 @@ def update_graph_live(n_intervals, data, interv): #interv
     if interv not in intList:
         interv = '5'
          
-    import time  
-    start_time = time.time()     
+   
     blob = Blob('FuturesOHLC'+str(symbolNum), bucket) 
     FuturesOHLC = blob.download_as_text()
         
@@ -354,13 +353,14 @@ def update_graph_live(n_intervals, data, interv): #interv
                 else 'gray' for i in difList]
     fig.add_trace(go.Bar(x=pd.Series([i[1] for i in difList]), y=pd.Series([i[0] for i in difList]), marker_color=coll), row=1, col=1)
     
-    
+    posti = sum([i[0] for i in difList if i[0] > 0])/len([i[0] for i in difList if i[0] > 0])
+    negati = sum([i[0] for i in difList if i[0] < 0])/len([i[0] for i in difList if i[0] < 0])
+    fig.add_hline(y=posti, row=1, col=1)
+    fig.add_hline(y=negati, row=1, col=1)
+
     fig.update_layout(title=stkName + str(datetime.now().time()),height=800, xaxis_rangeslider_visible=False, showlegend=False)
     fig.update_xaxes(showticklabels=False, row=1, col=1)
-    end_time = time.time()
-    # Calculate the elapsed time
-    elapsed_time = end_time - start_time
-    print(f"Elapsed time: {elapsed_time} seconds {stkName}")
+
     #fig.show()
     #print("The time difference is :", timeit.default_timer() - starttime)
 
