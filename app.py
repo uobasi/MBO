@@ -29,7 +29,7 @@ bucket = gclient.get_bucket("stockapp-storage")
 
 #import pandas_ta as ta
 from dash import Dash, dcc, html, Input, Output, callback, State
-inter = 22000 #250000#80001
+inter = 25000#250000#80001
 app = Dash()
 app.layout = html.Div([
     
@@ -106,9 +106,12 @@ def update_graph_live(n_intervals, data, interv): #interv
         
     if interv not in intList:
         interv = '5'
-         
+       
+    '''
     import time  
-    start_time = time.time()     
+    start_time = time.time()  
+    '''
+    
     blob = Blob('FuturesOHLC'+str(symbolNum), bucket) 
     FuturesOHLC = blob.download_as_text()
         
@@ -293,11 +296,12 @@ def update_graph_live(n_intervals, data, interv): #interv
             
     
     fig = go.Figure()
-    fig = make_subplots(rows=2, cols=1, shared_xaxes=True, shared_yaxes=False,
+    fig = make_subplots(rows=3, cols=1, shared_xaxes=True, shared_yaxes=False,
                         specs=[[{}],
+                               [{}],
                                [{}]],
                         horizontal_spacing=0.02, vertical_spacing=0.03,
-                         row_width=[0.50, 0.50,] ) #,row_width=[0.30, 0.70,] column_widths=[0.80,0.20],
+                         row_width=[0.33, 0.33, 0.33,] ) #,row_width=[0.30, 0.70,] column_widths=[0.80,0.20],
 
         
     
@@ -321,7 +325,7 @@ def update_graph_live(n_intervals, data, interv): #interv
             hovertext=pd.Series([i[0]+' '+i[1] for i in OptionTimeFrame]),
             
         ),
-         row=2, col=1
+         row=3, col=1
     )
     
     fig.add_trace(
@@ -338,32 +342,47 @@ def update_graph_live(n_intervals, data, interv): #interv
             hovertext=pd.Series([i[0]+' '+i[1] for i in OptionTimeFrame]),
             
         ),
-        row=2, col=1
+        row=3, col=1
     )
 
     bms = pd.Series([i[2] for i in OptionTimeFrame]).rolling(3).mean()
     sms = pd.Series([i[3] for i in OptionTimeFrame]).rolling(3).mean()
     #xms = pd.Series([i[3]+i[2] for i in OptionTimeFrame]).rolling(4).mean()
-    fig.add_trace(go.Scatter(x=pd.Series([i[0] for i in OptionTimeFrame]), y=bms, line=dict(color='teal'), mode='lines', name='Buy VMA'), row=2, col=1)
-    fig.add_trace(go.Scatter(x=pd.Series([i[0] for i in OptionTimeFrame]), y=sms, line=dict(color='crimson'), mode='lines', name='Sell VMA'), row=2, col=1)
+    fig.add_trace(go.Scatter(x=pd.Series([i[0] for i in OptionTimeFrame]), y=bms, line=dict(color='teal'), mode='lines', name='Buy VMA'), row=3, col=1)
+    fig.add_trace(go.Scatter(x=pd.Series([i[0] for i in OptionTimeFrame]), y=sms, line=dict(color='crimson'), mode='lines', name='Sell VMA'), row=3, col=1)
     
     
-    difList = [(i[2]-i[3],i[0]) for i in OptionTimeFrame]
+    difList = [[i[2]-i[3],i[0]] for i in OptionTimeFrame]
     coll = [     'teal' if i[0] > 0
                 else 'crimson' if i[0] < 0
                 else 'gray' for i in difList]
     fig.add_trace(go.Bar(x=pd.Series([i[1] for i in difList]), y=pd.Series([i[0] for i in difList]), marker_color=coll), row=1, col=1)
     
+    pDif = [[0, difList[0][1]]]
+    for i in range(1,len(difList)):
+        if difList[i][0] == 0:
+            difList[i][0] = 1
+        pDif.append([((difList[i][0] - difList[i-1][0]) / abs(difList[i-1][0])) * 100, difList[i][1]])
+        
+    coll = [     'teal' if i[0] > 0
+                else 'crimson' if i[0] < 0
+                else 'gray' for i in pDif]
+    fig.add_trace(go.Bar(x=pd.Series([i[1] for i in pDif]), y=pd.Series([i[0] for i in pDif]), marker_color=coll), row=2, col=1)
+    
+        
+        
     
     fig.update_layout(title=stkName + str(datetime.now().time()),height=800, xaxis_rangeslider_visible=False, showlegend=False)
     fig.update_xaxes(showticklabels=False, row=1, col=1)
+    
+    '''
     end_time = time.time()
     # Calculate the elapsed time
     elapsed_time = end_time - start_time
     print(f"Elapsed time: {elapsed_time} seconds {stkName}")
     #fig.show()
     #print("The time difference is :", timeit.default_timer() - starttime)
-
+    '''
     return fig
 
 
