@@ -39,6 +39,7 @@ app.layout = html.Div([
         interval=inter,
         n_intervals=0,
       ),
+    
 
     html.Div(dcc.Input(id='input-on-submit', type='text')),
     html.Button('Submit', id='submit-val', n_clicks=0),
@@ -355,6 +356,9 @@ def update_graph_live(n_intervals, data, interv): #interv
     
     posti = sum([i[0] for i in difList if i[0] > 0])/len([i[0] for i in difList if i[0] > 0])
     negati = sum([i[0] for i in difList if i[0] < 0])/len([i[0] for i in difList if i[0] < 0])
+    
+    buyss = sum([i[2] for i in OptionTimeFrame])/len([i[2] for i in OptionTimeFrame])
+    sellss = sum([i[3] for i in OptionTimeFrame])/len([i[3] for i in OptionTimeFrame])
 
     fig.add_trace(go.Scatter(x=df['time'],
                              y= [posti]*len(df['time']) ,
@@ -378,6 +382,30 @@ def update_graph_live(n_intervals, data, interv): #interv
                              mode= 'lines',
                             ),
                     row=1, col=1
+                 )
+    
+    fig.add_trace(go.Scatter(x=df['time'],
+                             y= [buyss]*len(df['time']) ,
+                             line_color='teal',
+                             text = str(buyss),
+                             textposition="bottom left",
+                             name=str(buyss),
+                             showlegend=False,
+                             mode= 'lines',
+                            ),
+                    row=2, col=1
+                 )
+
+    fig.add_trace(go.Scatter(x=df['time'],
+                             y= [sellss]*len(df['time']) ,
+                             line_color='crimson',
+                             text = str(sellss),
+                             textposition="bottom left",
+                             name=str(sellss),
+                             showlegend=False,
+                             mode= 'lines',
+                            ),
+                    row=2, col=1
                  )
     #fig.add_hline(y=posti, row=1, col=1)
     #fig.add_hline(y=negati, row=1, col=1)
