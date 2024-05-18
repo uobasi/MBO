@@ -39,6 +39,7 @@ app.layout = html.Div([
         interval=inter,
         n_intervals=0,
       ),
+    dcc.Store(id='data-store', storage_type='memory'),
 
     html.Div(dcc.Input(id='input-on-submit', type='text')),
     html.Button('Submit', id='submit-val', n_clicks=0),
@@ -90,10 +91,11 @@ def update_interval(n_clicks, value):
 @callback(Output('graph', 'figure'),
           Input('interval', 'n_intervals'),
           State('stkName-value', 'data'),
-          State('interv-value', 'data'))
+          State('interv-value', 'data'),
+          State('data-store', 'data'))
 
     
-def update_graph_live(n_intervals, data, interv): #interv
+def update_graph_live(n_intervals, data, interv, stored_data): #interv
     print('inFunction')	
     #print(interv)
 
@@ -106,6 +108,9 @@ def update_graph_live(n_intervals, data, interv): #interv
         
     if interv not in intList:
         interv = '5'
+        
+    
+        #stored_data = {'timeFrame': []}
          
    
     blob = Blob('FuturesOHLC'+str(symbolNum), bucket) 
@@ -213,51 +218,108 @@ def update_graph_live(n_intervals, data, interv): #interv
     tempTrades = sorted(tempTrades, key=lambda d: d[6], reverse=False) 
     tradeTimes = [i[6] for i in tempTrades]
     
-    timeDict = {}
-    cdDict = {}
-    for ttm in dtime:
-        for tradMade in tempTrades[bisect.bisect_left(tradeTimes, ttm):]:
-            if datetime.strptime(tradMade[6], "%H:%M:%S") > datetime.strptime(ttm, "%H:%M:%S") + timedelta(minutes=int(interv)):
-                try:
-                    timeDict[ttm] += [timeDict[ttm][0]/sum(timeDict[ttm]), timeDict[ttm][1]/sum(timeDict[ttm]), timeDict[ttm][2]/sum(timeDict[ttm])]
-                except(KeyError,ZeroDivisionError):
+    if stored_data is not None:
+        timeDict = {}
+        cdDict = {}
+        lastTime = stored_data['timeFrame'][len(stored_data['timeFrame'])-1][0]
+        for ttm in dtime[dtime.index(lastTime):]:
+            for tradMade in tempTrades[bisect.bisect_left(tradeTimes, ttm):]:
+                if datetime.strptime(tradMade[6], "%H:%M:%S") > datetime.strptime(ttm, "%H:%M:%S") + timedelta(minutes=int(interv)):
+                    try:
+                        timeDict[ttm] += [timeDict[ttm][0]/sum(timeDict[ttm]), timeDict[ttm][1]/sum(timeDict[ttm]), timeDict[ttm][2]/sum(timeDict[ttm])]
+                    except(KeyError,ZeroDivisionError):
+                        timeDict[ttm] = [0,0,0]
+                    break
+                
+                if ttm not in timeDict:
                     timeDict[ttm] = [0,0,0]
-                break
-            
-            if ttm not in timeDict:
-                timeDict[ttm] = [0,0,0]
-            if ttm in timeDict:
-                if tradMade[5] == 'B':
-                    timeDict[ttm][0] += tradMade[1]#tradMade[0] * tradMade[1]
-                elif tradMade[5] == 'A':
-                    timeDict[ttm][1] += tradMade[1]#tradMade[0] * tradMade[1] 
-                elif tradMade[5] == 'N':
-                    timeDict[ttm][2] += tradMade[1]#tradMade[0] * tradMade[1] 
+                if ttm in timeDict:
+                    if tradMade[5] == 'B':
+                        timeDict[ttm][0] += tradMade[1]#tradMade[0] * tradMade[1]
+                    elif tradMade[5] == 'A':
+                        timeDict[ttm][1] += tradMade[1]#tradMade[0] * tradMade[1] 
+                    elif tradMade[5] == 'N':
+                        timeDict[ttm][2] += tradMade[1]#tradMade[0] * tradMade[1] 
+                        
+                if ttm not in cdDict:
+                    cdDict[ttm] = []   
+                if ttm in cdDict:
+                    cdDict[ttm].append([tradMade[0], tradMade[1], tradMade[5]])
+                
+                   
                     
-            if ttm not in cdDict:
-                cdDict[ttm] = []   
-            if ttm in cdDict:
-                cdDict[ttm].append([tradMade[0], tradMade[1], tradMade[5]])
-            
-               
-                
-
-    for i in timeDict:
-        if len(timeDict[i]) == 3:
-            try:
-                timeDict[i] += [timeDict[i][0]/sum(timeDict[i]), timeDict[i][1]/sum(timeDict[i]), timeDict[i][2]/sum(timeDict[i])]#
-            except(ZeroDivisionError,KeyError):
-                timeDict[i] += [0, 0,0]
-                
     
-                                
-    timeFrame = [[i,'']+timeDict[i] for i in timeDict]
-
-    for i in range(len(timeFrame)):
-        timeFrame[i].append(dtimeEpoch[i])
+        for i in timeDict:
+            if len(timeDict[i]) == 3:
+                try:
+                    timeDict[i] += [timeDict[i][0]/sum(timeDict[i]), timeDict[i][1]/sum(timeDict[i]), timeDict[i][2]/sum(timeDict[i])]#
+                except(ZeroDivisionError,KeyError):
+                    timeDict[i] += [0, 0,0]
+                    
         
-    for pott in timeFrame:
-        pott.insert(4,df['timestamp'].searchsorted(pott[8]))
+                                    
+        timeFrame = [[i,'']+timeDict[i] for i in timeDict]
+    
+        for i in range(len(timeFrame)):
+            timeFrame[i].append(dtimeEpoch[i])
+            
+        
+        for pott in timeFrame:
+            pott.insert(4,df['timestamp'].searchsorted(pott[8]))
+            
+        stored_data['timeFrame'] = stored_data['timeFrame'][:len(stored_data['timeFrame'])-1] + timeFrame
+        timeFrame = stored_data['timeFrame']
+    
+    if stored_data is None:
+        timeDict = {}
+        cdDict = {}
+        for ttm in dtime:
+            for tradMade in tempTrades[bisect.bisect_left(tradeTimes, ttm):]:
+                if datetime.strptime(tradMade[6], "%H:%M:%S") > datetime.strptime(ttm, "%H:%M:%S") + timedelta(minutes=int(interv)):
+                    try:
+                        timeDict[ttm] += [timeDict[ttm][0]/sum(timeDict[ttm]), timeDict[ttm][1]/sum(timeDict[ttm]), timeDict[ttm][2]/sum(timeDict[ttm])]
+                    except(KeyError,ZeroDivisionError):
+                        timeDict[ttm] = [0,0,0]
+                    break
+                
+                if ttm not in timeDict:
+                    timeDict[ttm] = [0,0,0]
+                if ttm in timeDict:
+                    if tradMade[5] == 'B':
+                        timeDict[ttm][0] += tradMade[1]#tradMade[0] * tradMade[1]
+                    elif tradMade[5] == 'A':
+                        timeDict[ttm][1] += tradMade[1]#tradMade[0] * tradMade[1] 
+                    elif tradMade[5] == 'N':
+                        timeDict[ttm][2] += tradMade[1]#tradMade[0] * tradMade[1] 
+                        
+                if ttm not in cdDict:
+                    cdDict[ttm] = []   
+                if ttm in cdDict:
+                    cdDict[ttm].append([tradMade[0], tradMade[1], tradMade[5]])
+                
+                   
+                    
+    
+        for i in timeDict:
+            if len(timeDict[i]) == 3:
+                try:
+                    timeDict[i] += [timeDict[i][0]/sum(timeDict[i]), timeDict[i][1]/sum(timeDict[i]), timeDict[i][2]/sum(timeDict[i])]#
+                except(ZeroDivisionError,KeyError):
+                    timeDict[i] += [0, 0,0]
+                    
+        
+                                    
+        timeFrame = [[i,'']+timeDict[i] for i in timeDict]
+    
+        for i in range(len(timeFrame)):
+            timeFrame[i].append(dtimeEpoch[i])
+            
+        for pott in timeFrame:
+            pott.insert(4,df['timestamp'].searchsorted(pott[8]))
+            
+        stored_data = {'timeFrame': timeFrame} 
+        
+    
         
     
     fig = go.Figure()
