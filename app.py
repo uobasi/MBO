@@ -29,7 +29,7 @@ bucket = gclient.get_bucket("stockapp-storage")
 
 #import pandas_ta as ta
 from dash import Dash, dcc, html, Input, Output, callback, State
-inter = 30000 #250000#80001
+inter = 20000 #250000#80001
 app = Dash()
 app.layout = html.Div([
     
@@ -39,7 +39,7 @@ app.layout = html.Div([
         interval=inter,
         n_intervals=0,
       ),
-    dcc.Store(id='data-store', storage_type='memory'),
+    
 
     html.Div(dcc.Input(id='input-on-submit', type='text')),
     html.Button('Submit', id='submit-val', n_clicks=0),
@@ -50,6 +50,8 @@ app.layout = html.Div([
     html.Button('Submit', id='submit-interv', n_clicks=0),
     html.Div(id='interv-button-basic',children="Enter a symbol from |5 10 15 30 | and submit"),
     dcc.Store(id='interv-value'),
+    
+    dcc.Store(id='data-store')
     
     
 ])
@@ -88,16 +90,16 @@ def update_interval(n_clicks, value):
         return 'The input interval '+str(value)+" is not accepted please try different interval from  |'1' '2' '3' '5' '10' '15'|", 'The input interval '+str(value)+" is not accepted please try different interval from  |'1' '2' '3' '5' '10' '15'|"
 
 
-@callback(Output('graph', 'figure'),
-          Input('interval', 'n_intervals'),
-          State('stkName-value', 'data'),
-          State('interv-value', 'data'),
-          State('data-store', 'data'))
-
+@callback(
+    [Output('data-store', 'data'), Output('graph', 'figure')],
+    [Input('interval', 'n_intervals')],
+    [State('stkName-value', 'data'), State('interv-value', 'data'), State('data-store', 'data')],
+    prevent_initial_call=True
+)
     
 def update_graph_live(n_intervals, data, interv, stored_data): #interv
     print('inFunction')	
-    #print(interv)
+    print(data, interv, stored_data)
 
     if data in symbolNameList:
         stkName = data
@@ -109,8 +111,6 @@ def update_graph_live(n_intervals, data, interv, stored_data): #interv
     if interv not in intList:
         interv = '5'
         
-    
-        #stored_data = {'timeFrame': []}
          
    
     blob = Blob('FuturesOHLC'+str(symbolNum), bucket) 
@@ -196,7 +196,7 @@ def update_graph_live(n_intervals, data, interv, stored_data): #interv
         AllTrades.append([int(i[1])/1e9, int(i[2]), int(i[0]), 0, i[3], opttimeStamp])
         
     
-    mTrade = [i for i in AllTrades ]
+    mTrade = [i for i in AllTrades]
     
      
     mTrade = sorted(mTrade, key=lambda d: d[1], reverse=True)
@@ -219,6 +219,7 @@ def update_graph_live(n_intervals, data, interv, stored_data): #interv
     tradeTimes = [i[6] for i in tempTrades]
     
     if stored_data is not None:
+        print('here')
         timeDict = {}
         cdDict = {}
         lastTime = stored_data['timeFrame'][len(stored_data['timeFrame'])-1][0]
@@ -271,6 +272,7 @@ def update_graph_live(n_intervals, data, interv, stored_data): #interv
         timeFrame = stored_data['timeFrame']
     
     if stored_data is None:
+        print('Newstored')
         timeDict = {}
         cdDict = {}
         for ttm in dtime:
@@ -318,9 +320,10 @@ def update_graph_live(n_intervals, data, interv, stored_data): #interv
             pott.insert(4,df['timestamp'].searchsorted(pott[8]))
             
         stored_data = {'timeFrame': timeFrame} 
+        #dcc.Store(id='data-store', data=stored_data)  
         
     
-        
+      
     
     fig = go.Figure()
     fig = make_subplots(rows=2, cols=1, shared_xaxes=True, shared_yaxes=False,
@@ -418,8 +421,7 @@ def update_graph_live(n_intervals, data, interv, stored_data): #interv
     #fig.show()
     #print("The time difference is :", timeit.default_timer() - starttime)
 
-    return fig
-
+    return stored_data, fig
 
 if __name__ == '__main__': 
     app.run_server(debug=False, host='0.0.0.0', port=8080)
