@@ -19,8 +19,8 @@ pio.renderers.default='browser'
 import bisect
 from collections import Counter
 
-symbolNumList = ['5602', '13743', '669', '80420', '2552',  '1256', '320510', '42009544']
-symbolNameList = ['ES','NQ', 'GC',  'YM', 'RTY',  'PL', 'CL', 'BTC' ]
+symbolNumList = ['5602', '13743', '80420', '42009544', '132673', '131197', '133907', '28763', '123163', '1167']
+symbolNameList = ['ES', 'NQ',  'YM',  'BTC', '6J', '6E', '6B', '6C', '6A', '6N']
 
 intList = ['1','2','3','4','5','6','10','15']
 
