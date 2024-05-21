@@ -24,6 +24,7 @@ symbolNameList = ['ES', 'NQ',  'YM',  'BTC', '6J', '6E', '6B', '6C', '6A', '6N']
 
 intList = ['1','2','3','4','5','6','10','15']
 
+
 gclient = storage.Client(project="stockapp-401615")
 bucket = gclient.get_bucket("stockapp-storage")
 
@@ -51,7 +52,9 @@ app.layout = html.Div([
     html.Div(id='interv-button-basic',children="Enter a symbol from |5 10 15 30 | and submit"),
     dcc.Store(id='interv-value'),
     
-    dcc.Store(id='data-store')
+    dcc.Store(id='data-store'),
+    dcc.Store(id='previous-interv'),
+    dcc.Store(id='previous-stkName'),
     
     
 ])
@@ -91,25 +94,37 @@ def update_interval(n_clicks, value):
 
 
 @callback(
-    [Output('data-store', 'data'), Output('graph', 'figure')],
+    [Output('data-store', 'data'),
+        Output('graph', 'figure'),
+        Output('previous-stkName', 'data'),
+        Output('previous-interv', 'data')],
     [Input('interval', 'n_intervals')],
-    [State('stkName-value', 'data'), State('interv-value', 'data'), State('data-store', 'data')],
+    [State('stkName-value', 'data'),
+        State('interv-value', 'data'),
+        State('data-store', 'data'),
+        State('previous-stkName', 'data'),
+        State('previous-interv', 'data')
+    ],
     prevent_initial_call=True
 )
     
-def update_graph_live(n_intervals, data, interv, stored_data): #interv
+def update_graph_live(n_intervals, sname, interv, stored_data, previous_stkName, previous_interv): #interv
     print('inFunction')	
-    print(data, interv, stored_data)
+    #print(sname, interv, stored_data, previous_stkName)
 
-    if data in symbolNameList:
-        stkName = data
+    if sname in symbolNameList:
+        stkName = sname
         symbolNum = symbolNumList[symbolNameList.index(stkName)]   
     else:
-        stkName = 'NQ'  
+        stkName = 'NQ' 
+        sname = 'NQ'
         symbolNum = symbolNumList[symbolNameList.index(stkName)]
         
     if interv not in intList:
         interv = '5'
+        
+    if stkName != previous_stkName:
+        stored_data = None
         
          
    
@@ -219,9 +234,8 @@ def update_graph_live(n_intervals, data, interv, stored_data): #interv
     tradeTimes = [i[6] for i in tempTrades]
     
     if stored_data is not None:
-        print('here')
+        #print('here')
         timeDict = {}
-        cdDict = {}
         lastTime = stored_data['timeFrame'][len(stored_data['timeFrame'])-1][0]
         for ttm in dtime[dtime.index(lastTime):]:
             for tradMade in tempTrades[bisect.bisect_left(tradeTimes, ttm):]:
@@ -242,13 +256,6 @@ def update_graph_live(n_intervals, data, interv, stored_data): #interv
                     elif tradMade[5] == 'N':
                         timeDict[ttm][2] += tradMade[1]#tradMade[0] * tradMade[1] 
                         
-                if ttm not in cdDict:
-                    cdDict[ttm] = []   
-                if ttm in cdDict:
-                    cdDict[ttm].append([tradMade[0], tradMade[1], tradMade[5]])
-                
-                   
-                    
     
         for i in timeDict:
             if len(timeDict[i]) == 3:
@@ -262,19 +269,18 @@ def update_graph_live(n_intervals, data, interv, stored_data): #interv
         timeFrame = [[i,'']+timeDict[i] for i in timeDict]
     
         for i in range(len(timeFrame)):
-            timeFrame[i].append(dtimeEpoch[i])
+            timeFrame[i].append(dtimeEpoch[dtime.index(timeFrame[i][0])])
             
-        
+
         for pott in timeFrame:
             pott.insert(4,df['timestamp'].searchsorted(pott[8]))
             
         stored_data['timeFrame'] = stored_data['timeFrame'][:len(stored_data['timeFrame'])-1] + timeFrame
-        timeFrame = stored_data['timeFrame']
+        #timeFrame = stored_data['timeFrame']
     
     if stored_data is None:
         print('Newstored')
         timeDict = {}
-        cdDict = {}
         for ttm in dtime:
             for tradMade in tempTrades[bisect.bisect_left(tradeTimes, ttm):]:
                 if datetime.strptime(tradMade[6], "%H:%M:%S") > datetime.strptime(ttm, "%H:%M:%S") + timedelta(minutes=int(interv)):
@@ -293,13 +299,6 @@ def update_graph_live(n_intervals, data, interv, stored_data): #interv
                         timeDict[ttm][1] += tradMade[1]#tradMade[0] * tradMade[1] 
                     elif tradMade[5] == 'N':
                         timeDict[ttm][2] += tradMade[1]#tradMade[0] * tradMade[1] 
-                        
-                if ttm not in cdDict:
-                    cdDict[ttm] = []   
-                if ttm in cdDict:
-                    cdDict[ttm].append([tradMade[0], tradMade[1], tradMade[5]])
-                
-                   
                     
     
         for i in timeDict:
@@ -320,7 +319,6 @@ def update_graph_live(n_intervals, data, interv, stored_data): #interv
             pott.insert(4,df['timestamp'].searchsorted(pott[8]))
             
         stored_data = {'timeFrame': timeFrame} 
-        #dcc.Store(id='data-store', data=stored_data)  
         
     
       
@@ -334,7 +332,10 @@ def update_graph_live(n_intervals, data, interv, stored_data): #interv
 
         
     
-    OptionTimeFrame = timeFrame        
+    OptionTimeFrame = stored_data['timeFrame']   
+    previous_stkName = sname
+    #print(previous_stkName)
+
     
         
     optColor = [     'teal' if float(i[2]) > float(i[3]) #rgba(0,128,0,1.0)
@@ -421,7 +422,7 @@ def update_graph_live(n_intervals, data, interv, stored_data): #interv
     #fig.show()
     #print("The time difference is :", timeit.default_timer() - starttime)
 
-    return stored_data, fig
+    return stored_data, fig, previous_stkName, previous_interv
 
 if __name__ == '__main__': 
     app.run_server(debug=False, host='0.0.0.0', port=8080)
