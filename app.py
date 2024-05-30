@@ -194,8 +194,8 @@ def update_graph_live(n_intervals, data):
             text=pd.Series([i[0] for i in newDict2]),
             textposition='auto',
             orientation='h',
-            marker_color=[     'red' if 'A' in i[0] 
-                        else 'green' if 'B' in i[0]
+            marker_color=[     'crimson' if 'A' in i[0] 
+                        else 'teal' if 'B' in i[0]
                         else i for i in newDict2],
             hovertext=pd.Series([i[0]  + ' ' + str(i[1]) for i in newDict2]),
         ),
