@@ -194,7 +194,7 @@ def update_graph_live(n_intervals, data):
         go.Bar(
             x=pd.Series([i[1] for i in newDict2]),
             y=pd.Series([float(i[0][:len(i[0])-1]) for i in newDict2]),
-            text=pd.Series([i[0] for i in newDict2]),
+            text=pd.Series([i[0]+'('+str(i[1])+')' for i in newDict2]),
             textposition='auto',
             orientation='h',
             marker_color=[     'crimson' if 'A' in i[0] 
