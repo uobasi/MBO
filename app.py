@@ -39,8 +39,8 @@ def find_clusters(numbers, threshold):
 #FutureMBOSymbolNumList = ['5602', '13743', '44740', '1101', '80420', '2552', '2259', '156627', '156755', '1545', '4122', '270851', '948' ]
 #FutureMBOSymbolList = ['ES','NQ', 'GC', 'HG', 'YM', 'RTY', '6N', '6E', '6A', '6C', 'SI', 'CL', 'NG'  ]
 
-FutureMBOSymbolNumList = ['5602', '13743', '80420', '42009544', '200430', '2017', '1256', '74067', '74683']
-FutureMBOSymbolList = ['ES', 'NQ', 'YM','BTC', 'CL', 'GC', 'PL', 'HG', 'SI']
+FutureMBOSymbolNumList = ['183748', '106364', '42006053', '230943', '393','163699', '935', '42018437']
+FutureMBOSymbolList = ['ES', 'NQ', 'YM','CL', 'GC', 'HG', 'NG', 'RTY']
 
 #stkName = 'NQH4' 
 gclient = storage.Client(project="stockapp-401615")
