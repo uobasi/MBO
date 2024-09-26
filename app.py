@@ -350,7 +350,7 @@ def update_graph_live(n_intervals, sname, interv, stored_data, previous_stkName,
     
     if stored_data is not None:
         print('NotNew')
-        startIndex = next(iter(df.index[df['time'] == stored_data['timeFrame'][len(stored_data['timeFrame'])-1][0]]), None)#df['timestamp'].searchsorted(stored_data['timeFrame'][len(stored_data['timeFrame'])-1][9])
+        startIndex = next(iter(df.index[df['time'] == stored_data['tro'][len(stored_data['tro'])-1][0]]), None)#df['timestamp'].searchsorted(stored_data['timeFrame'][len(stored_data['timeFrame'])-1][9])
         timeDict = {}
         make = []
         for ttm in range(startIndex,len(dtimeEpoch)):
@@ -358,34 +358,6 @@ def update_graph_live(n_intervals, sname, interv, stored_data, previous_stkName,
             make.append([dtimeEpoch[ttm],dtime[ttm],bisect.bisect_left(tradeEpoch, dtimeEpoch[ttm])])
             timeDict[dtime[ttm]] = [0,0,0]
             
-        for tr in range(len(make)):
-            if tr+1 < len(make):
-                tempList = AllTrades[make[tr][2]:make[tr+1][2]]
-            else:
-                tempList = AllTrades[make[tr][2]:len(AllTrades)]
-            for i in tempList:
-                if i[5] == 'B':
-                    timeDict[make[tr][1]][0] += i[1]
-                elif i[5] == 'A':
-                    timeDict[make[tr][1]][1] += i[1] 
-                elif i[5] == 'N':
-                    timeDict[make[tr][1]][2] += i[1]
-            try:    
-                timeDict[make[tr][1]] += [timeDict[make[tr][1]][0]/sum(timeDict[make[tr][1]]), timeDict[make[tr][1]][1]/sum(timeDict[make[tr][1]]), timeDict[make[tr][1]][2]/sum(timeDict[make[tr][1]])]   
-            except(ZeroDivisionError):
-                timeDict[make[tr][1]]  += [0,0,0] 
-                
-        timeFrame = [[i,'']+timeDict[i] for i in timeDict]
-    
-        for i in range(len(timeFrame)):
-            timeFrame[i].append(dtimeEpoch[startIndex+i])
-            
-        for pott in timeFrame:
-            #print(pott)
-            pott.insert(4,df['timestamp'].searchsorted(pott[8]))
-            
-            
-        stored_data['timeFrame'] = stored_data['timeFrame'][:len(stored_data['timeFrame'])-1] + timeFrame
         
         bful = []
         for it in range(len(make)):
@@ -393,7 +365,6 @@ def update_graph_live(n_intervals, sname, interv, stored_data, previous_stkName,
                 tempList = AllTrades[0:make[it+1][2]]
             else:
                 tempList = AllTrades
-            #print(make[0][2],make[it+1][2], len(tempList))
             nelist = sorted(tempList, key=lambda d: d[1], reverse=True)[:200]
                         
             bful.append([make[it][1], sum([i[1] for i in nelist if i[5] == 'B']), sum([i[1] for i in nelist if i[5] == 'A'])])
@@ -428,33 +399,7 @@ def update_graph_live(n_intervals, sname, interv, stored_data, previous_stkName,
             
             
         
-        for tr in range(len(make)):
-            if tr+1 < len(make):
-                tempList = AllTrades[make[tr][2]:make[tr+1][2]]
-            else:
-                tempList = AllTrades[make[tr][2]:len(AllTrades)]
-            for i in tempList:
-                if i[5] == 'B':
-                    timeDict[make[tr][1]][0] += i[1]
-                elif i[5] == 'A':
-                    timeDict[make[tr][1]][1] += i[1] 
-                elif i[5] == 'N':
-                    timeDict[make[tr][1]][2] += i[1]
-            try:    
-                timeDict[make[tr][1]] += [timeDict[make[tr][1]][0]/sum(timeDict[make[tr][1]]), timeDict[make[tr][1]][1]/sum(timeDict[make[tr][1]]), timeDict[make[tr][1]][2]/sum(timeDict[make[tr][1]])]   
-            except(ZeroDivisionError):
-                timeDict[make[tr][1]]  += [0,0,0] 
-    
-                          
-        timeFrame = [[i,'']+timeDict[i] for i in timeDict]
-    
-        for i in range(len(timeFrame)):
-            timeFrame[i].append(dtimeEpoch[i])
-            
-        for pott in timeFrame:
-            #print(pott)
-            pott.insert(4,df['timestamp'].searchsorted(pott[8]))
-            
+        
         
         bful = []
         for it in range(len(make)):
@@ -478,7 +423,7 @@ def update_graph_live(n_intervals, sname, interv, stored_data, previous_stkName,
         
         dst = [[bful[row][0], bful[row][1], bolist[row], bful[row][2], solist[row]] for row in  range(len(bful))]
             
-        stored_data = {'timeFrame': timeFrame, 'tro':dst} 
+        stored_data = {'tro':dst} 
         
 
      
