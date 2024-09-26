@@ -526,8 +526,12 @@ def update_graph_live(n_intervals, sname, interv, stored_data, previous_stkName,
             cells=dict(values=transposed_data, fill_color=color_matrix, font=dict(color=textColor_matrix)),  # Transpose data to fit the table
         ),
     )
+    sellNum = stored_data['tro'][len(stored_data['tro'])-1][4]
+    buyNum = stored_data['tro'][len(stored_data['tro'])-1][2]
+    tpString = ' (Buy:' + str(buyNum) + '('+str(round(buyNum/(buyNum+sellNum),2))+') | '+ '(Sell:' + str(sellNum) + '('+str(round(sellNum/(buyNum+sellNum),2))+'))'
     
-    fig.update_layout(title=stkName + '  '+ str(datetime.now().time()),height=800, xaxis_rangeslider_visible=False, paper_bgcolor='#E5ECF6',showlegend=False)
+    
+    fig.update_layout(title=stkName + '  '+ str(datetime.now().time() + '  ' + tpString),height=800, xaxis_rangeslider_visible=False, paper_bgcolor='#E5ECF6',showlegend=False)
 
 
     return stored_data, fig, previous_stkName, previous_interv, interval_time
