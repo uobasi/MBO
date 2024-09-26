@@ -527,7 +527,7 @@ def update_graph_live(n_intervals, sname, interv, stored_data, previous_stkName,
         ),
     )
     
-    fig.update_layout(title=stkName + '  '+ str(datetime.now().time()),height=800, xaxis_rangeslider_visible=False, showlegend=False)
+    fig.update_layout(title=stkName + '  '+ str(datetime.now().time()),height=800, xaxis_rangeslider_visible=False, paper_bgcolor='#E5ECF6',showlegend=False)
 
 
     return stored_data, fig, previous_stkName, previous_interv, interval_time
