@@ -526,8 +526,8 @@ def update_graph_live(n_intervals, sname, interv, stored_data, previous_stkName,
             cells=dict(values=transposed_data, fill_color=color_matrix, font=dict(color=textColor_matrix)),  # Transpose data to fit the table
         ),
     )
-    sellNum = stored_data['tro'][len(stored_data['tro'])-1][4]
-    buyNum = stored_data['tro'][len(stored_data['tro'])-1][2]
+    sellNum = stored_data['tro'][len(stored_data['tro'])-1][3]
+    buyNum = stored_data['tro'][len(stored_data['tro'])-1][1]
     tpString = ' (Buy:' + str(buyNum) + '('+str(round(buyNum/(buyNum+sellNum),2))+') | '+ '(Sell:' + str(sellNum) + '('+str(round(sellNum/(buyNum+sellNum),2))+'))'
     
     
