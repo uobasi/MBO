@@ -102,7 +102,7 @@ styles = {
 from google.api_core.exceptions import NotFound
 from dash import Dash, dcc, html, Input, Output, callback, State
 initial_inter = 60*1000  # 60 seconds
-subsequent_inter = 15*1000  # 30 seconds
+subsequent_inter = 10*1000  # 30 seconds
 app = Dash()
 app.title = "Initial Title"
 app.layout = html.Div([
