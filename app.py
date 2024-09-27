@@ -30,7 +30,7 @@ import bisect
 #import dateutil.parser
 
 
-def find_spikes(data, high_percentile=97, low_percentile=3):
+def find_spikes(data, high_percentile=98, low_percentile=2):
     # Compute the high and low thresholds
     high_threshold = np.percentile(data, high_percentile)
     low_threshold = np.percentile(data, low_percentile)
