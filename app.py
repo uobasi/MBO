@@ -30,7 +30,7 @@ import bisect
 #import dateutil.parser
 
 
-def find_spikes(data, high_percentile=98, low_percentile=2):
+def find_spikes(data, high_percentile=95, low_percentile=5):
     # Compute the high and low thresholds
     high_threshold = np.percentile(data, high_percentile)
     low_threshold = np.percentile(data, low_percentile)
@@ -365,7 +365,7 @@ def update_graph_live(n_intervals, sname, interv, stored_data, previous_stkName,
                 tempList = AllTrades[0:make[it+1][2]]
             else:
                 tempList = AllTrades
-            nelist = sorted(tempList, key=lambda d: d[1], reverse=True)[:250]
+            nelist = sorted(tempList, key=lambda d: d[1], reverse=True)[:200]
                         
             bful.append([make[it][1], sum([i[1] for i in nelist if i[5] == 'B']), sum([i[1] for i in nelist if i[5] == 'A'])])
   
@@ -407,7 +407,7 @@ def update_graph_live(n_intervals, sname, interv, stored_data, previous_stkName,
                 tempList = AllTrades[0:make[it+1][2]]
             else:
                 tempList = AllTrades
-            nelist = sorted(tempList, key=lambda d: d[1], reverse=True)[:250]
+            nelist = sorted(tempList, key=lambda d: d[1], reverse=True)[:200]
                         
             bful.append([make[it][1], sum([i[1] for i in nelist if i[5] == 'B']), sum([i[1] for i in nelist if i[5] == 'A'])])
             
