@@ -365,7 +365,7 @@ def update_graph_live(n_intervals, sname, interv, stored_data, previous_stkName,
                 tempList = AllTrades[0:make[it+1][2]]
             else:
                 tempList = AllTrades
-            nelist = sorted(tempList, key=lambda d: d[1], reverse=True)[:300]
+            nelist = sorted(tempList, key=lambda d: d[1], reverse=True)[:250]
                         
             bful.append([make[it][1], sum([i[1] for i in nelist if i[5] == 'B']), sum([i[1] for i in nelist if i[5] == 'A'])])
   
@@ -407,7 +407,7 @@ def update_graph_live(n_intervals, sname, interv, stored_data, previous_stkName,
                 tempList = AllTrades[0:make[it+1][2]]
             else:
                 tempList = AllTrades
-            nelist = sorted(tempList, key=lambda d: d[1], reverse=True)[:300]
+            nelist = sorted(tempList, key=lambda d: d[1], reverse=True)[:250]
                         
             bful.append([make[it][1], sum([i[1] for i in nelist if i[5] == 'B']), sum([i[1] for i in nelist if i[5] == 'A'])])
             
