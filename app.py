@@ -45,8 +45,11 @@ def find_spikes(data, high_percentile=95, low_percentile=5):
     
     return spikes
 
-symbolNumList = ['183748', '106364', '42006053', '230943', '393','163699', '923', '42018437']
-symbolNameList = ['ES', 'NQ', 'YM','CL', 'GC', 'HG', 'NG', 'RTY']
+#symbolNumList = ['183748', '106364', '42006053', '230943', '393','163699', '923', '42018437']
+#symbolNameList = ['ES', 'NQ', 'YM','CL', 'GC', 'HG', 'NG', 'RTY']
+
+symbolNumList =  ['294973', '158704', '42004629']
+symbolNameList = ['ES', 'NQ', 'YM']
 
 intList = ['1','2','3','4','5','6','10','15']
 
@@ -55,7 +58,7 @@ vaildClust = [str(i) for i in range(3,20)]
 vaildTPO = [str(i) for i in range(10,500)]
 
 gclient = storage.Client(project="stockapp-401615")
-bucket = gclient.get_bucket("stockapp-storage")
+bucket = gclient.get_bucket("stockapp-storage-east1")
 
 styles = {
     'main_container': {
