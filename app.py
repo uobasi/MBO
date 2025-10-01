@@ -107,13 +107,13 @@ def update_graph_live(n_intervals, data):
                 
     dic2 = {}
     for i in minAgg2:
-        if i[2] not in dic2:
-            dic2[i[2]] = [0,0]
-        if i[2] in dic2:
+        if float(i[2]) not in dic2:
+            dic2[float(i[2])] = [0,0]
+        if float(i[2]) in dic2:
             if i[5] == 'A':
-                dic2[i[2]][0] += int(i[3])
+                dic2[float(i[2])][0] += int(i[3])
             elif i[5] == 'B':
-                dic2[i[2]][1] += int(i[3])
+                dic2[float(i[2])][1] += int(i[3])
                 
     
                 
@@ -124,9 +124,52 @@ def update_graph_live(n_intervals, data):
         
     newDict2.sort(key=lambda x:float(x[0][:len(x[0])-1]), reverse=True)
     
-    
+    total_vol = {price: vals[0] + vals[1] for price, vals in dic2.items()}
+
+    # Point of Control (price with max total volume)
+    poc = float(max(total_vol, key=total_vol.get))
+    poc_volume = total_vol[poc]
+
 
     
+    # Sort by price
+    sorted_prices = sorted(total_vol.keys())[::-1]
+    volumes = np.array([total_vol[p] for p in sorted_prices])
+    
+    # Total & 70% cutoff
+    total = volumes.sum()
+    target = total * 0.7
+    
+    # Start with POC
+    poc_idx = sorted_prices.index(poc)
+    value_area = {poc}
+    current_sum = total_vol[poc]
+    
+    low_idx = poc_idx
+    high_idx = poc_idx
+    
+    # Expand outwards until we reach ~70%
+    while current_sum < target:
+        left = total_vol[sorted_prices[low_idx - 1]] if low_idx > 0 else -1
+        right = total_vol[sorted_prices[high_idx + 1]] if high_idx < len(sorted_prices)-1 else -1
+        
+        # Pick side with higher vol
+        if right >= left:
+            high_idx += 1
+            current_sum += total_vol[sorted_prices[high_idx]]
+            value_area.add(sorted_prices[high_idx])
+        else:
+            low_idx -= 1
+            current_sum += total_vol[sorted_prices[low_idx]]
+            value_area.add(sorted_prices[low_idx])
+    
+    # High/Low value areas
+    low_va = min(value_area)
+    high_va = max(value_area)
+    
+    print("Low Value Area:", low_va)
+    print("High Value Area:", high_va)
+
     fig = go.Figure()
 
     
@@ -155,6 +198,14 @@ def update_graph_live(n_intervals, data):
         annotation_position="top right"
     )
     
+    fig.add_hline(
+        y=float(poc),
+        line_color="blue",
+        annotation_text='POC '+str(poc),
+        annotation_position="top right"
+    )
+    
+    
     # y_val = float(csv_rows[-1][2])
 
     # fig.add_trace(
@@ -176,6 +227,18 @@ def update_graph_live(n_intervals, data):
     
     dAsk = round(Ask / (Ask+Bid),2)
     dBid = round(Bid / (Ask+Bid),2)
+    
+    fig.add_shape(
+        type="rect",
+        x0=0, x1=max(total_vol.values()),  # full width of your bars
+        y0=low_va, y1=high_va,
+        fillcolor="crimson",
+        opacity=0.09,
+        layer="below",        # keep it behind bars
+        line_width=0,
+        xref="x",
+        yref="y"
+    )
     
 
     fig.update_layout(title=stkName + ' MO '+str(Ask)+'(Sell:'+str(dAsk)+') | '+str(Bid)+ '(Buy'+str(dBid)+') '+ str(datetime.now().time()),height=800, xaxis_rangeslider_visible=False, showlegend=False)
