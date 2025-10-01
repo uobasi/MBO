@@ -146,6 +146,31 @@ def update_graph_live(n_intervals, data):
         #row=1, col=2
     )
     
+    #fig.add_hline(y=csv_rows[len(csv_rows)-1][2])
+    
+    fig.add_hline(
+        y=float(csv_rows[-1][2]),
+        line_color="black",
+        annotation_text=str(float(csv_rows[-1][2])),
+        annotation_position="top right"
+    )
+    
+    # y_val = float(csv_rows[-1][2])
+
+    # fig.add_trace(
+    #     go.Scatter(
+    #         x=[min(pd.Series([i[1] for i in newDict2])) , max(pd.Series([i[1] for i in newDict2]))],
+    #         # or use your actual x-axis range if you have it
+    #         y=[y_val, y_val],
+    #         mode="lines+text",
+    #         line=dict(color="black"),
+    #         text=[str(y_val), ""],            # put text on the first point only
+    #         textposition="top right",
+    #         showlegend=False,
+    #         name="Last price line"
+    #     )
+    # )
+        
     Ask = sum([i[1] for i in newDict2 if 'A' in i[0]])
     Bid = sum([i[1] for i in newDict2 if 'B' in i[0]])
     
