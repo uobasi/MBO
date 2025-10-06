@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
 """
+Created on Mon Oct  6 03:03:30 2025
+
+@author: uobas
+"""
+
+# -*- coding: utf-8 -*-
+"""
 Created on Wed Jan 17 12:56:12 2024
 
 @author: UOBASUB
@@ -44,7 +51,7 @@ app.layout = html.Div([
 
     html.Div(dcc.Input(id='input-on-submit', type='text')),
     html.Button('Submit', id='submit-val', n_clicks=0),
-    html.Div(id='container-button-basic',children="Enter a symbol from |'ESH4' 'NQH4' 'CLG4' 'GCG4' 'NGG4' 'HGH4' 'YMH4' 'BTCZ3' 'RTYH4'| and submit"),
+    html.Div(id='container-button-basic',children="Enter a symbol from |'ES' 'NQ'| and submit"),
     dcc.Store(id='stkName-value')
 ])
 
@@ -84,7 +91,7 @@ def update_graph_live(n_intervals, data):
         
        
     
-    blob = Blob('levelTwoMBO'+str(symbolNum), bucket) 
+    blob = Blob('FuturesTrades'+str(symbolNum), bucket) 
     levelTwoMBO = blob.download_as_text()
     csv_reader  = csv.reader(io.StringIO(levelTwoMBO))
 
@@ -95,25 +102,25 @@ def update_graph_live(n_intervals, data):
         
         
     levelTwoMBO = csv_rows[::-1]
-    levelTwoMBO = [i for i in levelTwoMBO if i[6] == symbolNum and (i[4] == 'T')]
+    #levelTwoMBO = [i for i in levelTwoMBO if i[6] == symbolNum and (i[4] == 'T')]
     
 
     
     minAgg2 = []
     for i in levelTwoMBO:
-        if i[4] == 'T':
+        #if i[4] == 'T':
             if int(levelTwoMBO[0][0]) - (60000000000*30) <= int(i[0]):
                 minAgg2.append(i)
                 
     dic2 = {}
     for i in minAgg2:
-        if float(i[2]) not in dic2:
-            dic2[float(i[2])] = [0,0]
-        if float(i[2]) in dic2:
-            if i[5] == 'A':
-                dic2[float(i[2])][0] += int(i[3])
-            elif i[5] == 'B':
-                dic2[float(i[2])][1] += int(i[3])
+        if float(int(i[1]) / 1e9) not in dic2:
+            dic2[float(int(i[1]) / 1e9)] = [0,0]
+        if float(int(i[1]) / 1e9) in dic2:
+            if i[3] == 'A':
+                dic2[float(int(i[1]) / 1e9)][0] += int(i[2])
+            elif i[3] == 'B':
+                dic2[float(int(i[1]) / 1e9)][1] += int(i[2])
                 
     
                 
@@ -167,8 +174,8 @@ def update_graph_live(n_intervals, data):
     low_va = min(value_area)
     high_va = max(value_area)
     
-    print("Low Value Area:", low_va)
-    print("High Value Area:", high_va)
+    #print("Low Value Area:", low_va)
+    #print("High Value Area:", high_va)
 
     fig = go.Figure()
 
@@ -192,9 +199,9 @@ def update_graph_live(n_intervals, data):
     #fig.add_hline(y=csv_rows[len(csv_rows)-1][2])
     
     fig.add_hline(
-        y=float(csv_rows[-1][2]),
+        y=float(int(levelTwoMBO[0][1]) / 1e9),#float(csv_rows[-1][2]), 
         line_color="black",
-        annotation_text=str(float(csv_rows[-1][2])),
+        annotation_text=str(float(int(levelTwoMBO[0][1]) / 1e9)),
         annotation_position="top right"
     )
     
