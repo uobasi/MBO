@@ -28,8 +28,9 @@ import timeit
 #FutureMBOSymbolList = ['ESH4','NQH4','CLH4', 'GCG4', 'NGG4', 'HGH4', 'YMH4', 'BTCZ3', 'RTYH4']
 #FutureMBOSymbolNumList = ['17077', '750', '463194', '41512', '56065', '31863', '204839', '75685', '7062', ]
 
-FutureMBOSymbolNumList =  ['294973', '158704', '42004629']
+FutureMBOSymbolNumList =  ['42140878', '42002475', '42005850']
 FutureMBOSymbolList = ['ES', 'NQ', 'YM']
+
 
 gclient = storage.Client(project="stockapp-401615")
 bucket = gclient.get_bucket("stockapp-storage-east1")
