@@ -1,3 +1,4 @@
+'''
 # -*- coding: utf-8 -*-
 """
 Created on Mon Oct  6 03:03:30 2025
@@ -270,8 +271,248 @@ if __name__ == '__main__':
     app.run_server(debug=False, host='0.0.0.0', port=8080)
     #app.run_server(debug=False, use_reloader=False)
     
+'''
 
+# -*- coding: utf-8 -*-
+"""
+Enhanced MBO Orderflow + Control Engine
+@author: uobas
+"""
 
+from google.cloud.storage import Blob
+from google.cloud import storage
+import csv
+import io
+import plotly.graph_objects as go
+from datetime import datetime
+import pandas as pd
+import numpy as np
+import plotly.io as pio
+from dash import Dash, dcc, html, Input, Output, State
+
+pio.renderers.default = 'browser'
+
+# -------------------------------------------------
+# CONFIG
+# -------------------------------------------------
+FutureMBOSymbolNumList = ['42140878', '42002475', '42005850']
+FutureMBOSymbolList = ['ES', 'NQ', 'YM']
+
+REFRESH_MS = 6000
+LOOKBACK_NS = 1_000_000_000 * 60 * 60  # 30 minutes
+
+# -------------------------------------------------
+# GCS
+# -------------------------------------------------
+gclient = storage.Client(project="stockapp-401615")
+bucket = gclient.get_bucket("stockapp-storage-east1")
+
+# -------------------------------------------------
+# DASH APP
+# -------------------------------------------------
+app = Dash()
+app.layout = html.Div([
+    dcc.Graph(id='graph'),
+    dcc.Interval(id='interval', interval=REFRESH_MS, n_intervals=0),
+
+    html.Div([
+        dcc.Input(id='input-on-submit', type='text'),
+        html.Button('Submit', id='submit-val'),
+        html.Div(id='container-button-basic'),
+        dcc.Store(id='stkName-value'),
+    ])
+])
+
+# -------------------------------------------------
+# SYMBOL INPUT
+# -------------------------------------------------
+@app.callback(
+    Output('stkName-value', 'data'),
+    Output('container-button-basic', 'children'),
+    Input('submit-val', 'n_clicks'),
+    State('input-on-submit', 'value'),
+    prevent_initial_call=True
+)
+def update_symbol(_, value):
+    value = str(value).upper().strip()
+    if value in FutureMBOSymbolList:
+        return value, f"Symbol: {value}"
+    return 'NQ', "Invalid symbol, defaulting to NQ"
+
+# -------------------------------------------------
+# MAIN UPDATE
+# -------------------------------------------------
+@app.callback(
+    Output('graph', 'figure'),
+    Input('interval', 'n_intervals'),
+    State('stkName-value', 'data')
+)
+def update_graph(_, stk):
+    if stk not in FutureMBOSymbolList:
+        stk = 'NQ'
+
+    symbolNum = FutureMBOSymbolNumList[FutureMBOSymbolList.index(stk)]
+
+    # -------------------------------------------------
+    # LOAD DATA
+    # -------------------------------------------------
+    blob = Blob(f'FuturesTrades{symbolNum}', bucket)
+    rows = list(csv.reader(io.StringIO(blob.download_as_text())))[::-1]
+
+    now_ns = int(rows[0][0])
+
+    trades = [
+        r for r in rows
+        if now_ns - LOOKBACK_NS <= int(r[0])
+    ]
+
+    # -------------------------------------------------
+    # BUILD PRICE MAP
+    # -------------------------------------------------
+    book = {}
+    for t in trades:
+        price = float(int(t[1]) / 1e9)
+        size = int(t[2])
+        side = t[3]
+
+        if price not in book:
+            book[price] = [0, 0]  # ask, bid
+
+        if side == 'A':
+            book[price][0] += size
+        else:
+            book[price][1] += size
+
+    # -------------------------------------------------
+    # METRICS
+    # -------------------------------------------------
+    total_vol = {p: v[0] + v[1] for p, v in book.items()}
+    delta = {p: v[1] - v[0] for p, v in book.items()}
+
+    poc = max(total_vol, key=total_vol.get)
+    poc_vol = total_vol[poc]
+
+    prices_sorted = sorted(total_vol, reverse=True)
+    volumes = np.array([total_vol[p] for p in prices_sorted])
+
+    # -------------------------------------------------
+    # VOLUME VALUE AREA
+    # -------------------------------------------------
+    target = volumes.sum() * 0.68
+    cum = total_vol[poc]
+    low_i = high_i = prices_sorted.index(poc)
+
+    while cum < target:
+        left = total_vol[prices_sorted[low_i - 1]] if low_i > 0 else -1
+        right = total_vol[prices_sorted[high_i + 1]] if high_i < len(prices_sorted) - 1 else -1
+        if right >= left:
+            high_i += 1
+            cum += total_vol[prices_sorted[high_i]]
+        else:
+            low_i -= 1
+            cum += total_vol[prices_sorted[low_i]]
+
+    va_low = prices_sorted[high_i]
+    va_high = prices_sorted[low_i]
+
+    # -------------------------------------------------
+    # DELTA VALUE AREA
+    # -------------------------------------------------
+    abs_delta = {p: abs(d) for p, d in delta.items()}
+    sorted_delta = sorted(abs_delta, key=abs_delta.get, reverse=True)
+
+    cum = 0
+    target = sum(abs_delta.values()) * 0.7
+    delta_va = set()
+
+    for p in sorted_delta:
+        delta_va.add(p)
+        cum += abs_delta[p]
+        if cum >= target:
+            break
+
+    dva_low, dva_high = min(delta_va), max(delta_va)
+
+    # -------------------------------------------------
+    # CONTROL SCORE
+    # -------------------------------------------------
+    last_price = float(int(rows[0][1]) / 1e9)
+    control = 0
+    control += 1 if last_price > poc else -1
+    control += 1 if sum(delta.values()) > 0 else -1
+    control += 1 if sum(v for p, v in delta.items() if p > poc) > abs(sum(v for p, v in delta.items() if p < poc)) else -1
+
+    verdict = (
+        "BUYERS IN CONTROL" if control >= 2 else
+        "SELLERS IN CONTROL" if control <= -2 else
+        "BALANCED"
+    )
+
+    # -------------------------------------------------
+    # PLOT
+    # -------------------------------------------------
+    fig = go.Figure()
+
+    def delta_color(d):
+        return "rgba(0,180,0,0.9)" if d > 0 else "rgba(200,0,0,0.9)"
+
+    fig.add_trace(go.Bar(
+        x=[total_vol[p] for p in prices_sorted],
+        y=prices_sorted,
+        orientation='h',
+        marker_color=[delta_color(delta[p]) for p in prices_sorted],
+        showlegend=False
+    ))
+
+    # Last price
+    fig.add_hline(y=last_price, line_color="white")
+
+    # POC
+    fig.add_hline(y=poc, line_color="blue", annotation_text="POC")
+
+    # Volume VA
+    fig.add_shape(
+        type="rect",
+        x0=0,
+        x1=max(total_vol.values()),
+        y0=va_low,
+        y1=va_high,
+        fillcolor="rgba(255,0,0,0.40)",
+        layer="below",
+        line_width=0,
+        xref="x",   # 🔑 REQUIRED
+        yref="y"    # 🔑 REQUIRED
+    )
+    
+    # Delta VA
+    fig.add_shape(
+        type="rect",
+        x0=0,
+        x1=max(total_vol.values()),
+        y0=dva_low,
+        y1=dva_high,
+        fillcolor="rgba(0,0,255,0.40)",
+        layer="below",
+        line_width=0,
+        xref="x",   # 🔑 REQUIRED
+        yref="y"    # 🔑 REQUIRED
+    )
+
+    fig.update_layout(
+        title=f"{stk} | {verdict} | Score={control} | {datetime.now().time()}",
+        template="plotly_dark",
+        height=850,
+        xaxis_title="Volume",
+        yaxis_title="Price"
+    )
+
+    return fig
+
+# -------------------------------------------------
+# RUN
+# -------------------------------------------------
+if __name__ == '__main__':
+    app.run_server(debug=False, host='0.0.0.0', port=8080)
 
                 
                 
