@@ -259,7 +259,7 @@ def update_graph_live(n_intervals, data):
     )
     
 
-    fig.update_layout(title=stkName + ' MO '+str(Ask)+'(Sell:'+str(dAsk)+') | '+str(Bid)+ '(Buy'+str(dBid)+') '+ str(datetime.now().time()),height=800, xaxis_rangeslider_visible=False, showlegend=False, paper_bgcolor='#E5ECF6')
+    fig.update_layout(title=stkName + ' MO '+str(Ask)+'(Sell:'+str(dAsk)+') | '+str(Bid)+ '(Buy'+str(dBid)+') '+ str(datetime.now().time()), template="plotly_dark", height=800, xaxis_rangeslider_visible=False, showlegend=False, paper_bgcolor='#E5ECF6')
     #fig.show()
     #print("The time difference is :", timeit.default_timer() - starttime)
 
