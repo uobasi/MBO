@@ -295,8 +295,8 @@ pio.renderers.default = 'browser'
 # -------------------------------------------------
 # CONFIG
 # -------------------------------------------------
-FutureMBOSymbolNumList = ['42140878', '42002475', '42005850']
-FutureMBOSymbolList = ['ES', 'NQ', 'YM']
+FutureMBOSymbolNumList = ['42140878', '42002475', '42005850', '42001025']
+FutureMBOSymbolList = ['ES', 'NQ', 'YM', 'GC'] 
 
 REFRESH_MS = 6000
 LOOKBACK_NS = 1_000_000_000 * 60 * 60  # 30 minutes
