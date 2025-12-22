@@ -278,7 +278,7 @@ if __name__ == '__main__':
 Enhanced MBO Orderflow + Control Engine
 @author: uobas
 """
-
+'''
 from google.cloud.storage import Blob
 from google.cloud import storage
 import csv
@@ -514,8 +514,622 @@ def update_graph(_, stk):
 if __name__ == '__main__':
     app.run_server(debug=False, host='0.0.0.0', port=8080)
 
+ '''               
+                
+        
+      '''
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Oct  6 03:03:30 2025
+
+@author: uobas
+"""
+
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Jan 17 12:56:12 2024
+
+@author: UOBASUB
+"""
+from google.cloud.storage import Blob
+from google.cloud import storage
+import csv
+import io
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+from datetime import datetime, timedelta, date, time
+import pandas as pd 
+import numpy as np
+import plotly.io as pio
+pio.renderers.default='browser'
+import timeit
+
+    
+#FutureMBOSymbolList = ['ESH4','NQH4','CLH4', 'GCG4', 'NGG4', 'HGH4', 'YMH4', 'BTCZ3', 'RTYH4']
+#FutureMBOSymbolNumList = ['17077', '750', '463194', '41512', '56065', '31863', '204839', '75685', '7062', ]
+
+FutureMBOSymbolNumList =  ['42140878', '42002475', '42005850']
+FutureMBOSymbolList = ['ES', 'NQ', 'YM']
+
+
+gclient = storage.Client(project="stockapp-401615")
+bucket = gclient.get_bucket("stockapp-storage-east1")
+
+
+#stkName = 'NQH4'  
+
+from dash import Dash, dcc, html, Input, Output, callback, State
+inter = 6000
+app = Dash()
+app.layout = html.Div([
+    
+    dcc.Graph(id='graph'),
+    dcc.Interval(
+        id='interval',
+        interval=inter,
+        n_intervals=0,
+      ),
+
+    #html.Div(dcc.Input(id='input-on-submit', type='text')),
+    #html.Button('Submit', id='submit-val', n_clicks=0),
+    #html.Div(id='container-button-basic',children="Enter a symbol from |'ES' 'NQ'| and submit"),
+    #dcc.Store(id='stkName-value')
+
+    html.Div([
+        html.Div([
+            dcc.Input(id='input-on-submit', type='text', className="input-field"),
+            html.Button('Submit', id='submit-val', n_clicks=0, className="submit-button"),
+            html.Div(id='container-button-basic', children="Enter a symbol from ES, NQ", className="label-text"),
+        ], className="sub-container"),
+        dcc.Store(id='stkName-value'),
+
+    ], className="main-container"),
+])
+
+@callback(
+    Output('stkName-value', 'data'),
+    Output('container-button-basic', 'children'),
+    Input('submit-val', 'n_clicks'),
+    State('input-on-submit', 'value'),
+    prevent_initial_call=True
+)
+
+def update_output(n_clicks, value):
+    value = str(value).upper().strip()
+    
+    if value in FutureMBOSymbolList:
+        print('The input symbol was "{}" '.format(value))
+        return str(value).upper(), str(value).upper()
+    
+    
+    else:
+        return 'The input symbol was '+str(value)+" is not accepted please try different symbol from  |'ESH4' 'NQH4' 'CLG4' 'GCG4' 'NGG4' 'HGH4' 'YMH4' 'BTCZ3' 'RTYH4'|  ", 'The input symbol was '+str(value)+" is not accepted please try different symbol  |'ESH4' 'NQH4' 'CLG4' 'GCG4' 'NGG4' 'HGH4' 'YMH4' 'BTCZ3' 'RTYH4'|  "
+
+@callback(Output('graph', 'figure'),
+          Input('interval', 'n_intervals'),
+          State('stkName-value', 'data'))
+
+    
+def update_graph_live(n_intervals, data):
+    print('inFunction')	
+
+    if data in FutureMBOSymbolList:
+        stkName = data
+        symbolNum = FutureMBOSymbolNumList[FutureMBOSymbolList.index(stkName)] 
+    else:
+        stkName = 'NQ'  
+        symbolNum = FutureMBOSymbolNumList[FutureMBOSymbolList.index(stkName)]
+        
+       
+    
+    blob = Blob('FuturesTrades'+str(symbolNum), bucket) 
+    levelTwoMBO = blob.download_as_text()
+    csv_reader  = csv.reader(io.StringIO(levelTwoMBO))
+
+
+    csv_rows = []
+    [csv_rows.append(row) for row in csv_reader]
+       
+        
+        
+    levelTwoMBO = csv_rows[::-1]
+    #levelTwoMBO = [i for i in levelTwoMBO if i[6] == symbolNum and (i[4] == 'T')]
+    
+
+    
+    minAgg2 = []
+    for i in levelTwoMBO:
+        #if i[4] == 'T':
+            if int(levelTwoMBO[0][0]) - (60000000000*30) <= int(i[0]):
+                minAgg2.append(i)
+                
+    dic2 = {}
+    for i in minAgg2:
+        if float(int(i[1]) / 1e9) not in dic2:
+            dic2[float(int(i[1]) / 1e9)] = [0,0]
+        if float(int(i[1]) / 1e9) in dic2:
+            if i[3] == 'A':
+                dic2[float(int(i[1]) / 1e9)][0] += int(i[2])
+            elif i[3] == 'B':
+                dic2[float(int(i[1]) / 1e9)][1] += int(i[2])
+                
+    
+                
+    newDict2 = []
+    for i in dic2:
+        newDict2.append([str(i)+'A',dic2[i][0]])
+        newDict2.append([str(i)+'B',dic2[i][1]])
+        
+    newDict2.sort(key=lambda x:float(x[0][:len(x[0])-1]), reverse=True)
+    
+    total_vol = {price: vals[0] + vals[1] for price, vals in dic2.items()}
+
+    # Point of Control (price with max total volume)
+    poc = float(max(total_vol, key=total_vol.get))
+    poc_volume = total_vol[poc]
+
+
+    
+    # Sort by price
+    sorted_prices = sorted(total_vol.keys())[::-1]
+    volumes = np.array([total_vol[p] for p in sorted_prices])
+    
+    # Total & 70% cutoff
+    total = volumes.sum()
+    target = total * 0.7
+    
+    # Start with POC
+    poc_idx = sorted_prices.index(poc)
+    value_area = {poc}
+    current_sum = total_vol[poc]
+    
+    low_idx = poc_idx
+    high_idx = poc_idx
+    
+    # Expand outwards until we reach ~70%
+    while current_sum < target:
+        left = total_vol[sorted_prices[low_idx - 1]] if low_idx > 0 else -1
+        right = total_vol[sorted_prices[high_idx + 1]] if high_idx < len(sorted_prices)-1 else -1
+        
+        # Pick side with higher vol
+        if right >= left:
+            high_idx += 1
+            current_sum += total_vol[sorted_prices[high_idx]]
+            value_area.add(sorted_prices[high_idx])
+        else:
+            low_idx -= 1
+            current_sum += total_vol[sorted_prices[low_idx]]
+            value_area.add(sorted_prices[low_idx])
+    
+    # High/Low value areas
+    low_va = min(value_area)
+    high_va = max(value_area)
+    
+    #print("Low Value Area:", low_va)
+    #print("High Value Area:", high_va)
+
+    fig = go.Figure()
+
+    
+    fig.add_trace(
+        go.Bar(
+            x=pd.Series([i[1] for i in newDict2]),
+            y=pd.Series([float(i[0][:len(i[0])-1]) for i in newDict2]),
+            text=pd.Series([i[0] for i in newDict2]),
+            textposition='auto',
+            orientation='h',
+            #width=0.2,
+            marker_color=[     'red' if 'A' in i[0] 
+                        else 'green' if 'B' in i[0]
+                        else i for i in newDict2],
+            hovertext=pd.Series([i[0]  + ' ' + str(i[1]) for i in newDict2]),
+        ),
+        #row=1, col=2
+    )
+    
+    #fig.add_hline(y=csv_rows[len(csv_rows)-1][2])
+    
+    fig.add_hline(
+        y=float(int(levelTwoMBO[0][1]) / 1e9),#float(csv_rows[-1][2]), 
+        line_color="black",
+        annotation_text=str(float(int(levelTwoMBO[0][1]) / 1e9)),
+        annotation_position="top right"
+    )
+    
+    fig.add_hline(
+        y=float(poc),
+        line_color="blue",
+        annotation_text='POC '+str(poc),
+        annotation_position="top right"
+    )
+    
+    
+    # y_val = float(csv_rows[-1][2])
+
+    # fig.add_trace(
+    #     go.Scatter(
+    #         x=[min(pd.Series([i[1] for i in newDict2])) , max(pd.Series([i[1] for i in newDict2]))],
+    #         # or use your actual x-axis range if you have it
+    #         y=[y_val, y_val],
+    #         mode="lines+text",
+    #         line=dict(color="black"),
+    #         text=[str(y_val), ""],            # put text on the first point only
+    #         textposition="top right",
+    #         showlegend=False,
+    #         name="Last price line"
+    #     )
+    # )
+        
+    Ask = sum([i[1] for i in newDict2 if 'A' in i[0]])
+    Bid = sum([i[1] for i in newDict2 if 'B' in i[0]])
+    
+    dAsk = round(Ask / (Ask+Bid),2)
+    dBid = round(Bid / (Ask+Bid),2)
+    
+    fig.add_shape(
+        type="rect",
+        x0=0, x1=max(total_vol.values()),  # full width of your bars
+        y0=low_va, y1=high_va,
+        fillcolor="crimson",
+        opacity=0.09,
+        layer="below",        # keep it behind bars
+        line_width=0,
+        xref="x",
+        yref="y"
+    )
+    
+
+    fig.update_layout(title=stkName + ' MO '+str(Ask)+'(Sell:'+str(dAsk)+') | '+str(Bid)+ '(Buy'+str(dBid)+') '+ str(datetime.now().time()), height=800, xaxis_rangeslider_visible=False, showlegend=False, paper_bgcolor='#E5ECF6')
+    #fig.show()
+    #print("The time difference is :", timeit.default_timer() - starttime)
+
+    return fig
+
+
+if __name__ == '__main__': 
+    app.run_server(debug=False, host='0.0.0.0', port=8080)
+    #app.run_server(debug=False, use_reloader=False)
+    
+'''
+
+# -*- coding: utf-8 -*-
+"""
+Enhanced MBO Orderflow + Control Engine
+@author: uobas
+"""
+
+from google.cloud.storage import Blob
+from google.cloud import storage
+import csv
+import io
+import plotly.graph_objects as go
+from datetime import datetime
+import pandas as pd
+import numpy as np
+import plotly.io as pio
+from dash import Dash, dcc, html, Input, Output, State
+
+pio.renderers.default = 'browser'
+
+# -------------------------------------------------
+# CONFIG
+# -------------------------------------------------
+FutureMBOSymbolNumList = ['42140878', '42002475', '42005850', '42001025']
+FutureMBOSymbolList = ['ES', 'NQ', 'YM', 'GC'] 
+
+REFRESH_MS = 6000
+LOOKBACK_NS = 1_000_000_000 * 60 * 60  # 30 minutes
+
+# -------------------------------------------------
+# GCS
+# -------------------------------------------------
+gclient = storage.Client(project="stockapp-401615")
+bucket = gclient.get_bucket("stockapp-storage-east1")
+
+# -------------------------------------------------
+# DASH APP
+# -------------------------------------------------
+app = Dash()
+app.layout = html.Div([
+    dcc.Graph(id='graph'),
+    dcc.Interval(id='interval', interval=REFRESH_MS, n_intervals=0),
+
+    html.Div([
+        dcc.Input(id='input-on-submit', type='text'),
+        html.Button('Submit', id='submit-val'),
+        html.Div(id='container-button-basic'),
+        dcc.Store(id='stkName-value'),
+    ])
+])
+
+# -------------------------------------------------
+# SYMBOL INPUT
+# -------------------------------------------------
+@app.callback(
+    Output('stkName-value', 'data'),
+    Output('container-button-basic', 'children'),
+    Input('submit-val', 'n_clicks'),
+    State('input-on-submit', 'value'),
+    prevent_initial_call=True
+)
+def update_symbol(_, value):
+    value = str(value).upper().strip()
+    if value in FutureMBOSymbolList:
+        return value, f"Symbol: {value}"
+    return 'NQ', "Invalid symbol, defaulting to NQ"
+
+# -------------------------------------------------
+# MAIN UPDATE
+# -------------------------------------------------
+@app.callback(
+    Output('graph', 'figure'),
+    Input('interval', 'n_intervals'),
+    State('stkName-value', 'data')
+)
+def update_graph(_, stk):
+    if stk not in FutureMBOSymbolList:
+        stk = 'NQ'
+
+    symbolNum = FutureMBOSymbolNumList[FutureMBOSymbolList.index(stk)]
+
+    # -------------------------------------------------
+    # LOAD DATA
+    # -------------------------------------------------
+    blob = Blob(f'FuturesTrades{symbolNum}', bucket)
+    rows = list(csv.reader(io.StringIO(blob.download_as_text())))[::-1]
+
+    now_ns = int(rows[0][0])
+
+    trades = [
+        r for r in rows
+        if now_ns - LOOKBACK_NS <= int(r[0])
+    ]
+
+    # -------------------------------------------------
+    # BUILD PRICE MAP
+    # -------------------------------------------------
+    book = {}
+    for t in trades:
+        price = float(int(t[1]) / 1e9)
+        size = int(t[2])
+        side = t[3]
+
+        if price not in book:
+            book[price] = [0, 0]  # ask, bid
+
+        if side == 'A':
+            book[price][0] += size
+        else:
+            book[price][1] += size
+
+    # -------------------------------------------------
+    # METRICS
+    # -------------------------------------------------
+    total_vol = {p: v[0] + v[1] for p, v in book.items()}
+    delta = {p: v[1] - v[0] for p, v in book.items()}
+
+    poc = max(total_vol, key=total_vol.get)
+    poc_vol = total_vol[poc]
+
+    prices_sorted = sorted(total_vol, reverse=True)
+    volumes = np.array([total_vol[p] for p in prices_sorted])
+
+    # -------------------------------------------------
+    # VOLUME VALUE AREA
+    # -------------------------------------------------
+    target = volumes.sum() * 0.68
+    cum = total_vol[poc]
+    low_i = high_i = prices_sorted.index(poc)
+
+    while cum < target:
+        left = total_vol[prices_sorted[low_i - 1]] if low_i > 0 else -1
+        right = total_vol[prices_sorted[high_i + 1]] if high_i < len(prices_sorted) - 1 else -1
+        if right >= left:
+            high_i += 1
+            cum += total_vol[prices_sorted[high_i]]
+        else:
+            low_i -= 1
+            cum += total_vol[prices_sorted[low_i]]
+
+    va_low = prices_sorted[high_i]
+    va_high = prices_sorted[low_i]
+
+    # -------------------------------------------------
+    # DELTA VALUE AREA
+    # -------------------------------------------------
+    abs_delta = {p: abs(d) for p, d in delta.items()}
+    sorted_delta = sorted(abs_delta, key=abs_delta.get, reverse=True)
+
+    cum = 0
+    target = sum(abs_delta.values()) * 0.7
+    delta_va = set()
+
+    for p in sorted_delta:
+        delta_va.add(p)
+        cum += abs_delta[p]
+        if cum >= target:
+            break
+
+    dva_low, dva_high = min(delta_va), max(delta_va)
+
+    # -------------------------------------------------
+    # CONTROL SCORE
+    # -------------------------------------------------
+    last_price = float(int(rows[0][1]) / 1e9)
+    
+    total_ask = sum(v[0] for v in book.values())
+    total_bid = sum(v[1] for v in book.values())
+    
+    aggressive_ratio = (
+        total_bid / (total_ask + total_bid)
+        if (total_ask + total_bid) > 0 else 0.5
+    )
+    
+    delta_series = pd.Series(delta).sort_index()
+    delta_slope = delta_series.diff().mean()
+    
+    
+    volume_above_va = sum(
+    total_vol[p] for p in total_vol if p > va_high
+    )
+    volume_below_va = sum(
+        total_vol[p] for p in total_vol if p < va_low
+    )
+    
+    acceptance_score = 0
+    acceptance_score += 1 if last_price > va_high else -1
+    acceptance_score += 1 if volume_above_va > volume_below_va else -1
+    
+    absorption_detected = False
+
+    price_change = abs(last_price - poc)
+    net_delta = sum(delta.values())
+    
+    DELTA_THRESHOLD = np.percentile(np.abs(list(delta.values())), 85)
+    TICK_SIZE = 0.25  # adjust per instrument
+    
+    if abs(net_delta) > DELTA_THRESHOLD and price_change <= TICK_SIZE:
+        absorption_detected = True
+        
+        
+    bias = 0
+
+    # 1. Aggression
+    if aggressive_ratio > 0.58:
+        bias += 25
+    elif aggressive_ratio < 0.42:
+        bias -= 25
+    
+    # 2. Delta momentum
+    bias += 20 if delta_slope > 0 else -20
+    
+    # 3. Location vs POC
+    bias += 15 if last_price > poc else -15
+    
+    # 4. Acceptance vs rejection
+    bias += 20 if acceptance_score > 0 else -20
+    
+    # 5. Absorption logic
+    if absorption_detected:
+        if last_price <= va_low:
+            bias += 20   # bullish absorption
+        elif last_price >= va_high:
+            bias -= 20   # bearish absorption
+            
+            
+    if bias >= 40:
+        verdict = "STRONG BUYERS IN CONTROL"
+    elif bias >= 20:
+        verdict = "BUYERS IN CONTROL"
+    elif bias <= -40:
+        verdict = "STRONG SELLERS IN CONTROL"
+    elif bias <= -20:
+        verdict = "SELLERS IN CONTROL"
+    else:
+        verdict = "BALANCED / ROTATION"
+    
+    direction = (
+        "UP" if bias >= 25 else
+        "DOWN" if bias <= -25 else
+        "RANGE"
+    )
+    
+    confidence = min(abs(bias), 100)
+    
+    # control = 0
+    # control += 1 if last_price > poc else -1
+    # control += 1 if sum(delta.values()) > 0 else -1
+    # control += 1 if sum(v for p, v in delta.items() if p > poc) > abs(sum(v for p, v in delta.items() if p < poc)) else -1
+
+    # verdict = (
+    #     "BUYERS IN CONTROL" if control >= 2 else
+    #     "SELLERS IN CONTROL" if control <= -2 else
+    #     "BALANCED"
+    # )
+
+    # -------------------------------------------------
+    # PLOT
+    # -------------------------------------------------
+    fig = go.Figure()
+
+    def delta_color(d):
+        return "rgba(0,180,0,0.9)" if d > 0 else "rgba(200,0,0,0.9)"
+
+    fig.add_trace(go.Bar(
+        x=[total_vol[p] for p in prices_sorted],
+        y=prices_sorted,
+        orientation='h',
+        marker_color=[delta_color(delta[p]) for p in prices_sorted],
+        showlegend=False
+    ))
+
+    # Last price
+    fig.add_hline(y=last_price, line_color="white")
+
+    # POC
+    fig.add_hline(y=poc, line_color="blue", annotation_text="POC")
+
+    # Volume VA
+    fig.add_shape(
+        type="rect",
+        x0=0,
+        x1=max(total_vol.values()),
+        y0=va_low,
+        y1=va_high,
+        fillcolor="rgba(255,0,0,0.40)",
+        layer="below",
+        line_width=0,
+        xref="x",   # 🔑 REQUIRED
+        yref="y"    # 🔑 REQUIRED
+    )
+    
+    # Delta VA
+    fig.add_shape(
+        type="rect",
+        x0=0,
+        x1=max(total_vol.values()),
+        y0=dva_low,
+        y1=dva_high,
+        fillcolor="rgba(0,0,255,0.40)",
+        layer="below",
+        line_width=0,
+        xref="x",   # 🔑 REQUIRED
+        yref="y"    # 🔑 REQUIRED
+    )
+
+    # fig.update_layout(
+    #     title=f"{stk} | {verdict} | Score={control} | {datetime.now().time()}",
+    #     template="plotly_dark",
+    #     height=850,
+    #     xaxis_title="Volume",
+    #     yaxis_title="Price"
+    # )
+    
+    fig.update_layout(
+        title=(
+            f"{stk} | {verdict}<br>"
+            f"Bias: {direction} ({confidence}%) | "
+            f"Aggression: {aggressive_ratio:.2f} | "
+            f"ΔSlope: {delta_slope:.2f} | "
+            f"{datetime.now().time()}"
+        ),
+        template="plotly_dark",
+        height=850,
+        xaxis_title="Volume",
+        yaxis_title="Price"
+    )
+
+    return fig
+
+# -------------------------------------------------
+# RUN
+# -------------------------------------------------
+if __name__ == '__main__':
+    app.run_server(debug=False, host='0.0.0.0', port=8080)
+
                 
                 
         
         
+      
     
