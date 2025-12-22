@@ -1059,7 +1059,7 @@ def update_graph(_, stk):
         x=[total_vol[p] for p in prices_sorted],
         y=prices_sorted,
         orientation='h',
-        marker_color=[delta_color(delta[p]) for p in prices_sorted],
+        marker_color=[delta_color(delta[p]) for p in prices_sorted], 
         showlegend=False
     ))
 
