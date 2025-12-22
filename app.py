@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Dec 22 05:42:14 2025
+
+@author: uobas
+"""
+
 '''
 # -*- coding: utf-8 -*-
 """
@@ -517,7 +524,7 @@ if __name__ == '__main__':
  '''               
                 
         
-      '''
+'''
 # -*- coding: utf-8 -*-
 """
 Created on Mon Oct  6 03:03:30 2025
